@@ -1,0 +1,2 @@
+# CovidMap
+My University thesis
