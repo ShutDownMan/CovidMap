@@ -1,0 +1,309 @@
+%-----------------------------------------------------------------
+% UNIOESTE - Ci\^ encia da Computa\c c\~ ao
+% 4o. ano - Trabalho de Conclus\~ ao de Curso
+% Profa. Teresinha Arnauts Hachisuca 
+%-----------------------------------------------------------------
+%DECLARA\c C\~ AO DO TIPO DE DOCUMENTO, TAMANHO DA FOLHA E FONTE
+%-----------------------------------------------------------------
+\documentclass[
+	% -- op\c c\~ oes da classe memoir --
+	12pt,				% tamanho da fonte
+% 	twoside,			% para impress\~ ao em verso e anverso. Oposto a oneside
+	a4paper,			% tamanho do papel. 
+	% -- op\c c\~ oes da classe abntex2 --
+	%chapter=TITLE,		% t\' itulos de cap\' itulos convertidos em letras mai\' usculas
+	%section=TITLE,		% t\' itulos de se\c c\~ oes convertidos em letras mai\' usculas
+	%subsection=TITLE,	% t\' itulos de subse\c c\~ oes convertidos em letras mai\' usculas
+	%subsubsection=TITLE,% t\' itulos de subsubse\c c\~ oes convertidos em letras mai\' usculas
+	% -- op\c c\~ oes do pacote babel --
+	english,			% idioma adicional para hifeniza\c c\~ ao
+	brazil,				% o \' ultimo idioma \' e o principal do documento
+	]{article}
+	
+%-----------------------------------------------------------------
+%DEFINI\c C\~ OES DOS PACOTES UTILIZADOS
+%-----------------------------------------------------------------
+\usepackage{cmap}				% Mapear caracteres especiais no PDF
+\usepackage{lmodern}			% Usa a fonte Latin Modern			
+\usepackage[T1]{fontenc}		% Selecao de codigos de fonte.
+\usepackage[utf8]{inputenc}		% Codificacao do documento (convers\~ ao autom\' atica dos acentos)
+\usepackage{lastpage}			% Usado pela Ficha catalogr\' afica
+%\usepackage{indentfirst}		% Indenta o primeiro par\' agrafo de cada se\c c\~ ao.
+\usepackage{color}				% Controle das cores
+\usepackage{graphicx}			% Inclus\~ ao de gr\' aficos
+
+\usepackage[brazil]{babel}      % Permite traduzir termos do LateX para portugu\^ es Brasil.
+\usepackage{hyperref}           % Permite ativar hyperlinks
+\usepackage{algorithm}          % pacote que de suporte a representa\c c\~ ao de algoritmos.
+
+\usepackage{algorithmic}
+\usepackage[pdftex]{geometry}
+\usepackage{multirow}
+
+% ---
+% Pacotes de cita\c c\~ oes
+% ---
+\usepackage[brazilian,hyperpageref]{backref}	 % Paginas com as cita\c c\~ oes na bibl
+\usepackage[alf]{abntex2cite}	% Cita\c c\~ oes padr\~ ao ABNT
+%\citebrackets[]
+
+%\usepackage[backend=bibtex]{biblatex}
+
+
+% --- 
+% CONFIGURA\c C\~ OES DE PACOTES
+% --- 
+
+% ---
+% Configura\c c\~ oes do pacote backref
+% Usado sem a op\c c\~ ao hyperpageref de backref
+\renewcommand{\backrefpagesname}{Citado na(s) p\' agina(s):~}
+
+% Texto padr\~ ao antes do n\' umero das p\' aginas
+\renewcommand{\backref}{}
+
+% Define os textos da cita\c c\~ ao
+\renewcommand*{\backrefalt}[4]{
+	\ifcase #1 %
+		Nenhuma cita\c c\~ ao no texto.%
+	\or
+		Citado na p\' agina #2.%
+	\else
+		Citado #1 vezes nas p\' aginas #2.%
+	\fi}%
+% ---
+
+%-----------------------------------------------------------------
+%               INICIO DO DOCUMENTO - CAPA
+%-----------------------------------------------------------------
+\begin{document}
+
+%\nobibliography*
+
+\begin{center}
+
+	\textsc{
+		\large
+			\\universidade estadual do oeste do paran\' a
+			\\unioeste - campus de foz do igua\c cu
+			\\centro de engenharias e ci\^ encias exatas
+			\\curso de ci\^ encia da computa\c c\~ ao
+			\\[1 cm]tcc - trabalho de conclus\~ ao de curso
+	}
+	\\
+	[4 cm]
+	\large Proposta de Trabalho de Conclus\~ ao de Curso
+    \\
+	\textbf{
+	    \textsc{Minera\c c\~ ao de texto da literatura m\' edica sobre a COVID-19}
+    }
+	\\[5 cm]Jedson Gabriel Ferreira de Paula
+    \\Orientador: Rômulo César Silva
+    %\\Co-orientador(es): \{Nome dos Co-orientadores\}
+    \\[2 cm]Foz do Igua\c cu, 22 de junho de 2020
+    
+    
+\end{center}
+
+\thispagestyle{empty}
+
+%-----------------------------------------------------------------
+%               IDENTIFICA\c C\~ AO DO PROJETO
+%-----------------------------------------------------------------
+\section{Identifica\c c\~ ao}
+    
+    \subsection{Ci\^ encia da Computa\c c\~ ao} 
+    
+    % Consultar o link {\bf http://www.cnpq.br/documents/10157/186158/ TabeladeAreasdoConhecimento.pdf} 
+    % para verificar as \' areas e linhas de pesquisa existentes.
+    
+        \noindent Grande \' area: Ci\^ encia da Computa\c c\~ ao
+        \\C\' odigo: 1.03.00.00-7 
+    	\\[1 cm]Linha de Pesquisa: Matem\' atica da Computa\c c\~ ao
+    	\\C\' odigo: 1.03.02.00-0
+    	\\[1 cm]Especialidade: Modelos Anal\' iticos e de Simula{\c c}\~ ao
+    	\\C\' odigo: 1.03.02.02-6
+    	
+    	
+    \subsection{Palavras-chave}
+
+        \begin{enumerate}
+        	\item minera\c c\~ ao de conhecimento
+        	\item covid-19
+        	\item coronav\' irus
+        \end{enumerate}
+
+%-----------------------------------------------------------------
+%               INTRODU\c C\~ AO E JUSTIFICATIVA
+%-----------------------------------------------------------------
+\section{Introdu\c c\~ ao e Justificativa}
+
+% O texto ainda está como uma cópia total da proposta e desejo ir iterando sobre ela
+
+Segundo informa\c c\~ oes do Minist\' erio da Sa\' ude \cite{brasil20online}, a COVID-19 \' e uma doen\c ca causada pelo coronav\' irus SARS-CoV-2, que apresenta um quadro cl\' inico que varia de infec\c c\~ oes assintom\' aticas a quadros respirat\' orios graves. De acordo com a Organiza\c c\~ ao Mundial de Sa\' ude (OMS), a maioria dos pacientes com COVID-19 (cerca de 80\%) podem ser assintom\' aticos e cerca de 20\% dos casos podem requerer atendimento hospitalar por apresentarem dificuldade respirat\' oria e desses casos aproximadamente 5\% podem necessitar de suporte para o tratamento de insufici\^ encia respirat\' oria (suporte ventilat\' orio). Nos tr\^ es primeiros meses de 2020, a pandemia desse coronav\' irus atigiu v\' arios pa\' ises, incluindo o Brasil. As maiores preocupa\c c\~ oes atuais dos governos de diferentes pa\' ises \' e com o colapso nos sistemas de sa\' udes devido à sobrecarga de pacientes necessitando interna\c c\~ ao, e os preju\' izos econômicos e sociais devido ao confinamento e restri\c c\~ ao de deslocamento dos cidad\~ aos.
+
+A Minera\c c\~ ao de Dados tem sido aplicada nas mais diversas \' areas do conhecimento com o intuito de descobrir novas informa\c c\~ oes e subsidiar as tomadas de decis\~ oes \cite{bramer2007principles, aggarwal2015data}. Atualmente existem diversas ferramentas e frameworks desenvolvidos especialmente para a minera\c c\~ ao de dados (data mining) e aprendizado de m\' aquina (machine learning) tais como: Scikit-Learn, Weka, R, Python e Pandas \cite{geron19}. Uma das aplica\c c\~ oes de minera\c c\~ ao de dados \' e o Processamento de Linguagem Natural (do ingl\^ es NLP – Natural Language Processing) e a minera\c c\~ ao de texto com o objetivo de mapeamento, extra\c c\~ ao de informa\c c\~ ao, entendimento de linguagem humana (natural) \cite{dinov2018data}. Tamb\' em t\^ em sido desenvolvidas diversas ferramentas open-source voltadas especificamente para minera\c c\~ ao de textos tais como: Aika, Rapidminer Text Mining, Data Science Toolkit e KNIME \cite{kaur2016comparison}. A minera\c c\~ ao de texto examina grande volumes de texto n\~ ao estruturado (corpus), auxiliando a extra\c c\~ ao de novas informa\c c\~ oes, descoberta de contexto, identifica\c c\~ ao de motivos lingu\' isticos, ou transformar o texto em formato de dados estruturado para derivar dados quantitativos que possam ser analisados futuramente \cite{aggarwal2015data}.
+
+Uma das principais justificativas a favor do uso de minera\c c\~ ao de textos \' e a sobrecarga de informa\c c\~ ao devido ao grande volume de textos. Pode-se elencar entre as dificuldades para os humanos relacionadas a essa condi\c c\~ ao: profissionais se manterem atualizados com toda a literatura existente, encontrar informa\c c\~ ao precisa e relevante, sintetizar informa\c c\~ ao de fontes diversas e descobrir novos conhecimentos.
+
+O dataset CORD-19 representa a mais extensa cole\c c\~ ao de literatura sobre coronav\' irus, leg\' ivel por m\' aquina, dispon\' ivel para minera\c c\~ ao de dados at\' e o momento \cite{kaggle20online}. Isto representa uma oportunidade de aplicar abordagens de minera\c c\~ ao de texto e dados para encontrar respostas a perguntas e conectar informa\c c\~ oes sobre esse conte\' udo em apoio aos esfor\c cos cont\' inuos de resposta ao COVID-19. H\' a uma crescente urg\^ encia para essas abordagens devido ao r\' apido aumento da literatura sobre o coronav\' irus, dificultando o acompanhamento da comunidade m\' edica. O site \citeonline{kaggle20online}, que promove competi\c c\~ oes/desafios em aprendizado de m\' aquina, tem elencado algumas quest\~ oes cient\' ificas importantes para minera\c c\~ ao de texto no dataset CORD-19, extra\' idas de t\' opicos de pesquisa do SCIED (Standing Committee on Emerging Infectious Diseases and 21st Century Health Threats) do NASEM (National Academies of Sciences, Engineering, and Medicine) nos EUA e da Organiza\c c\~ ao Mundial da Sa\' ude (OMS) para COVID-19.
+
+% Este parágrafo mostra o objetivo ent\~ ao n\~ ao sei se deve ficar aqui
+%Este projeto prop\~oe desenvolver uma ferramenta de minera\c c\~ ao de textos e aprendizagem de m\' aquina voltada para aplica\c c\~ ao no dataset CORD-19 com o objetivo de fornecer uma aplica\c c\~ ao que facilita a cataloga\c c\~ ao de textos acad\^ emicos de interesse da comunidade m\' edica, de acordo com crit\' erios da OMS.
+
+%-----------------------------------------------------------------
+%                       OBJETIVO
+%-----------------------------------------------------------------	
+\section{Objetivos}
+
+% N\~ ao sei se deve ser colocado algum texto aqui
+%As atividades a serem desenvolvidas durante o per\' iodo s\~ ao:
+
+%-------------------------------------------------------------------------------
+
+\subsection{Objetivo Geral}
+
+% TODO: Melhorar objetivo
+	Este projeto prop\~oe desenvolver uma ferramenta de minera\c c\~ ao de textos e aprendizagem de m\' aquina voltada para aplica\c c\~ ao no dataset CORD-19 com o objetivo de fornecer uma aplica\c c\~ ao que facilita a pesquisa de textos acad\^ emicos de interesse da comunidade m\' edica, de acordo com crit\' erios da OMS.
+
+%-------------------------------------------------------------------------------
+
+\subsection{Objetivos Espec\' ificos}
+
+% TODO: reescrever objetivos espec\' ificos
+{\bf Dentre os principais objetivos espec\' ificos destacam-se: }
+\begin{itemize}
+\item Pesquisa e revis\~ ao bibliogr\' afica sobre t\' ecnicas gerais de minera\c c\~ ao de textos e aprendizagem de m\' aquina
+\item Estudar as caracter\' isticas/informa\c c\~ oes gerais da base CORD-19
+\item Pesquisa e sele\c c\~ ao de quest\~ oes cient\' ificas relevantes referentes à COVID19 e o SARS-CoV-2
+\item Implementa\c c\~ ao de t\' ecnicas identificadas como adequadas à minera\c c\~ ao de
+textos relacionadas às quest\~ oes selecionadas
+\item Interpreta\c c\~ ao/avalia\c c\~ ao dos resultados obtidos
+\item Constru{\c c}\~ ao da aplica{\c c}\~ ao que utiliza das informa{\c c}\~ oes processadas (mineradas) para pesquisa  e recomenda{\c c}\~ ao de artigos relacionados
+\item Reda\c c\~ ao de artigo cient\' ifico para que o aluno possa desenvolver a
+capacidade de escrever de maneira cient\' ifica sobre o pr\' oprio processo de
+pesquisa e os resultados obtidos
+\end{itemize}
+
+%-------------------------------------------------------------------------------
+
+
+    	
+%-----------------------------------------------------------------
+%           PLANO DE TRABALHO E CRONOGRAMA DE EXECU\c C\~ AO
+%-----------------------------------------------------------------	
+\section{Plano de Trabalho e Cronograma de Execu\c c\~ ao}
+	
+    As atividades a serem desenvolvidas s\~ ao:
+
+% TODO: Reescrever atividades
+    \begin{enumerate}
+
+        \item Revis\~ ao bibliogr\' afica sobre t\' ecnicas gerais de minera\c c\~ ao de texto e aprendizagem de m\' aquina e respectivas ferramentas open source (Python, Java, Scikit-Learn, R, Rapidminer Text Mining, Data Science Toolkit e KNIME);\label{a1}
+        
+        \item Estudo das caracter\' isticas gerais da base CORD-19 e quest\~ oes cient\' ificas relevantes referentes à COVID-19 e o SARS-CoV-2; \label{a2}
+
+        \item Implementa\c c\~ ao da ferramenta proposta para minera\c c\~ ao de texto na base CORD-19;   \label{a3}
+
+        \item An\' alise dos resultados obtidos pelos algoritmos de minera\c c\~ ao de textos e aprendizado de m\' aquina usados.   \label{a4}
+
+        \item Elaboração e apresentação no tutorial de TCC (Trabalho de conclusão de cuso);  \label{a5}
+
+        \item Constru{\c c}\~ ao da aplica{\c c}\~ ao para pesquisa e recomenda{\c c}\~ ao de artigos relacionados;   \label{a6}
+
+         \item Reda{\c c}\~ ao do artigo descrevendo o processo de pesquisa e do resultado obtido;   \label{a7}
+
+         \item Reda\c c\~ ao da monografia para submiss\~ ao a banca;   \label{a8}
+    
+\end{enumerate}
+
+    Na Tabela \ref{tabela:cronograma1} \' e apresentado o cronograma de atividades a ser seguido.
+ 
+\begin{table}[ht]
+    \scriptsize
+    \centering
+    \begin{tabular}{|l|c|c|c|c|c|c|c|}
+        \hline &  \multicolumn{7}{|c|}
+        {\textbf{Per\' iodo}} \\ \cline{2-8}
+        \textbf{Atividades}     &Nov      &Dez      &Jan      &Fev      &Mar	&Abr      &Jun	\\ \hline
+        \ref{a1} - Revis\~ ao Bibliogr\' afica	&$\bullet$&$\bullet$&$\bullet$&	&	&	&	\\ \hline
+        \ref{a2} - Estudo da base CORD-19	&$\bullet$&$\bullet$&$\bullet$&	&	&	&	\\ \hline
+        \ref{a3} - Implementa\c c\~ ao da ferramenta	&$\bullet$&$\bullet$&$\bullet$&$\bullet$&$\bullet$&	&	\\ \hline
+        \ref{a4} - An\' alise dos resultados	&	&$\bullet$&$\bullet$&$\bullet$&$\bullet$&$\bullet$&	\\ \hline
+        \ref{a5} - Elaboração e apresentação no tutorial de TCC	&	&	&	&$\bullet$&	&	&	\\ \hline
+        \ref{a6} - Constru{\c c}\~ ao da aplica{\c c}\~ ao	&	&$\bullet$&$\bullet$&$\bullet$&$\bullet$&$\bullet$&	\\ \hline
+        \ref{a7} -  Reda\c c\~ ao do artigo	&	&	&$\bullet$&$\bullet$&$\bullet$&$\bullet$&	\\ \hline
+        \ref{a8} - Reda\c c\~ ao da monografia	&	&	&$\bullet$&$\bullet$&$\bullet$&$\bullet$&$\bullet$	\\ \hline
+%        \ref{a7} - Apresenta{\c c}\~ ao	&	&	&	&$\bullet$&$\bullet$&	\\ \hline
+
+   \end{tabular}
+     \caption{Cronograma das Atividades}
+    \label{tabela:cronograma1}
+\end{table}
+ 
+%-----------------------------------------------------------------
+%                   MATERIAL E M\' ETODO
+%----------------------------------------------------------------- 
+
+\section{Material e M\' etodo}
+
+Para desenvolvimento deste projeto ser\~ ao usados os materiais:
+
+% Acredito que devo colocar minhas especifica{\c c}\~ oes aqui
+\begin{itemize}
+\item Notebook Acer, 8 GB de memória RAM, 1 TB de HDD, 256 GB de SSD, Intel i7 7ª gera{\c c}\~ ao, Placa de v\' ideo Geforce 940MX;
+\item Linguagem de programa\c c\~ ao javascript, python e suas bibliotecas cient\' ificas (Numpy, Pandas, Scikit-Learn)
+\item Ferramentas open source voltadas especificamente para minera\c c\~ ao de textos (Aika, Rapidminer Text Mining, Data Science Toolkit e KNIME)
+\item Quanto à metodologia de desenvolvimento de software ser\' a adotado modelo iterativo e incremental \cite{pressman2016engenharia}.
+\end{itemize}
+
+   A pesquisa bibliográfica será desenvolvida com fundamento em \cite{lakatos2001metodologia} nas seguintes etapas:
+   \begin{enumerate}
+\item Levantamento bibliográfico preliminar; \label{b1}
+\item Busca das fontes; \label{b2}
+\item Leitura do material; \label{b3}
+\item Redação do texto; \label{b4}
+   \end{enumerate}
+   
+   Sendo \ref{b1} listado na síntese bibliográfica deste documento. \ref{b2} será feito e documentado posteriormente na redação do texto. Todas estas etapas incorporarão a atividade \ref{a1} citada no cronograma \ref{tabela:cronograma1}.
+
+Os dados que serão utilizados durante o processo de mineração são os encontrados no dataset do Kaggle \cite{kaggle20online}, nele contém a literatura médica sobre a doença e vírus o qual a comunidade médica possui interesse de estudo nos dias atuais.
+
+O público que este texto está focado é o de ciência da computação pois as técnicas serão discutidas em termos de eficiência algoritmica para eficácia de classificação, já que o objeto a ser manipulado exige entendimento especializado. A aplicação que será desenvolvida já é para o uso da comunidade médica sendo levado em consideração a facilitação de pesquisa e exploração dos tópicos incorporados pelos textos acadêmicos.
+
+A manipulação do texto será feita da seguinte forma: seus abstracts incorporados ao corpo do texto, mantendo uma refêrencia da sua origem para uso posterior; serão limpos e organizados os registros; e serão aplicadas as ferramentas estudadas no período da elaboração da revisão.
+
+O resultado será analisado em termos de coerência dos clusters a partir dos tópicos incorporados nos textos.
+
+%-----------------------------------------------------------------
+%               CRIT\' ERIOS DE AVALIA\c C\~ AO
+%-----------------------------------------------------------------
+\section{Crit\' erios de Avalia\c c\~ ao} 
+
+	Depois de escolhidas as caracter\' isticas para cria{\c c}\~ ao da matriz de features e feita a redu{\c c}\~ ao de dimensionalidade para realiza{\c c}\~ ao do clustering, teremos um espa{\c c}o preenchido com um cont\' inuo das variáveis latentes. E a qualidade destes clusters, isto é, o qu\~ ao bem definidos seus per\' imetros s\~ ao pode ser medido com um algor\' itmo que define o coeficiente da silhueta.
+    
+    
+    
+%-----------------------------------------------------------------
+%                       REFER\^ ENCIAS
+%----------------------------------------------------------------- 
+
+
+
+\renewcommand\refname{}
+\section{Refer\^ encias}
+
+%Referencias bibliogr\' aficas que foram utilizadas para desenvolver a proposta de TCC.
+    \vspace{-4.3em}
+    \bibliography{referencias}
+    
+%-----------------------------------------------------------------
+%                   S\' iNTESE BIBLIOGR\' aFICA
+%----------------------------------------------------------------- 
+\section{S\' intese Bibliogr\' afica}
+
+%Referencias bibliogr\' aficas que se pretende utilizar para o desenvolvimento do trabalho.
+    \vspace{-3.5em}
+    \input{sintese.tex}
+ 
+\end{document}
