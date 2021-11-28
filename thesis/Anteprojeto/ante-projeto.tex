@@ -100,7 +100,7 @@
 	\\[5 cm]Jedson Gabriel Ferreira de Paula
     \\Orientador: Rômulo César Silva
     %\\Co-orientador(es): \{Nome dos Co-orientadores\}
-    \\[2 cm]Foz do Igua\c cu, 22 de junho de 2020
+    \\[2 cm]Foz do Igua\c cu, 26 de Novembro de 2021
     
     
 \end{center}
@@ -138,7 +138,7 @@
 %-----------------------------------------------------------------
 \section{Introdu\c c\~ ao e Justificativa}
 
-% O texto ainda está como uma cópia total da proposta e desejo ir iterando sobre ela
+% O texto ainda est\' a como uma cópia total da proposta e desejo ir iterando sobre ela
 
 Segundo informa\c c\~ oes do Minist\' erio da Sa\' ude \cite{brasil20online}, a COVID-19 \' e uma doen\c ca causada pelo coronav\' irus SARS-CoV-2, que apresenta um quadro cl\' inico que varia de infec\c c\~ oes assintom\' aticas a quadros respirat\' orios graves. De acordo com a Organiza\c c\~ ao Mundial de Sa\' ude (OMS), a maioria dos pacientes com COVID-19 (cerca de 80\%) podem ser assintom\' aticos e cerca de 20\% dos casos podem requerer atendimento hospitalar por apresentarem dificuldade respirat\' oria e desses casos aproximadamente 5\% podem necessitar de suporte para o tratamento de insufici\^ encia respirat\' oria (suporte ventilat\' orio). Nos tr\^ es primeiros meses de 2020, a pandemia desse coronav\' irus atigiu v\' arios pa\' ises, incluindo o Brasil. As maiores preocupa\c c\~ oes atuais dos governos de diferentes pa\' ises \' e com o colapso nos sistemas de sa\' udes devido à sobrecarga de pacientes necessitando interna\c c\~ ao, e os preju\' izos econômicos e sociais devido ao confinamento e restri\c c\~ ao de deslocamento dos cidad\~ aos.
 
@@ -146,9 +146,12 @@ A Minera\c c\~ ao de Dados tem sido aplicada nas mais diversas \' areas do conhe
 
 Uma das principais justificativas a favor do uso de minera\c c\~ ao de textos \' e a sobrecarga de informa\c c\~ ao devido ao grande volume de textos. Pode-se elencar entre as dificuldades para os humanos relacionadas a essa condi\c c\~ ao: profissionais se manterem atualizados com toda a literatura existente, encontrar informa\c c\~ ao precisa e relevante, sintetizar informa\c c\~ ao de fontes diversas e descobrir novos conhecimentos.
 
-O dataset CORD-19 representa a mais extensa cole\c c\~ ao de literatura sobre coronav\' irus, leg\' ivel por m\' aquina, dispon\' ivel para minera\c c\~ ao de dados at\' e o momento \cite{kaggle20online}. Isto representa uma oportunidade de aplicar abordagens de minera\c c\~ ao de texto e dados para encontrar respostas a perguntas e conectar informa\c c\~ oes sobre esse conte\' udo em apoio aos esfor\c cos cont\' inuos de resposta ao COVID-19. H\' a uma crescente urg\^ encia para essas abordagens devido ao r\' apido aumento da literatura sobre o coronav\' irus, dificultando o acompanhamento da comunidade m\' edica. O site \citeonline{kaggle20online}, que promove competi\c c\~ oes/desafios em aprendizado de m\' aquina, tem elencado algumas quest\~ oes cient\' ificas importantes para minera\c c\~ ao de texto no dataset CORD-19, extra\' idas de t\' opicos de pesquisa do SCIED (Standing Committee on Emerging Infectious Diseases and 21st Century Health Threats) do NASEM (National Academies of Sciences, Engineering, and Medicine) nos EUA e da Organiza\c c\~ ao Mundial da Sa\' ude (OMS) para COVID-19.
+O dataset CORD-19 representa a mais extensa cole\c c\~ ao de literatura sobre coronav\' irus, leg\' ivel por m\' aquina, dispon\' ivel para minera\c c\~ ao de dados at\' e o momento \cite{kaggle20online}.
+Isto representa uma oportunidade de aplicar abordagens de minera\c c\~ ao de texto e dados para encontrar respostas a perguntas e conectar informa\c c\~ oes sobre esse conte\' udo em apoio aos esfor\c cos cont\' inuos de resposta ao COVID-19.
+H\' a uma crescente urg\^ encia para essas abordagens devido ao r\' apido aumento da literatura sobre o coronav\' irus, dificultando o acompanhamento da comunidade m\' edica.
+O site \citeonline{kaggle20online}, que promove competi\c c\~ oes/desafios em aprendizado de m\' aquina, tem elencado algumas quest\~ oes cient\' ificas importantes para minera\c c\~ ao de texto no dataset CORD-19, extra\' idas de t\' opicos de pesquisa do SCIED (Standing Committee on Emerging Infectious Diseases and 21st Century Health Threats) do NASEM (National Academies of Sciences, Engineering, and Medicine) nos EUA e da Organiza\c c\~ ao Mundial da Sa\' ude (OMS) para COVID-19.
 
-% Este parágrafo mostra o objetivo ent\~ ao n\~ ao sei se deve ficar aqui
+% Este par\' agrafo mostra o objetivo ent\~ ao n\~ ao sei se deve ficar aqui
 %Este projeto prop\~oe desenvolver uma ferramenta de minera\c c\~ ao de textos e aprendizagem de m\' aquina voltada para aplica\c c\~ ao no dataset CORD-19 com o objetivo de fornecer uma aplica\c c\~ ao que facilita a cataloga\c c\~ ao de textos acad\^ emicos de interesse da comunidade m\' edica, de acordo com crit\' erios da OMS.
 
 %-----------------------------------------------------------------
@@ -164,7 +167,12 @@ O dataset CORD-19 representa a mais extensa cole\c c\~ ao de literatura sobre co
 \subsection{Objetivo Geral}
 
 % TODO: Melhorar objetivo
-	Este projeto prop\~oe desenvolver uma ferramenta de minera\c c\~ ao de textos e aprendizagem de m\' aquina voltada para aplica\c c\~ ao no dataset CORD-19 com o objetivo de fornecer uma aplica\c c\~ ao que facilita a pesquisa de textos acad\^ emicos de interesse da comunidade m\' edica, de acordo com crit\' erios da OMS.
+    A partir de esfor\c cos anteriores do estudo e minera\c c\~ ao dos textos presentes no dataset CORD-19
+    prop\~oe desenvolver uma ferramenta de indexa\c c\~ ao, pesquisa e visualiza\c c\~ ao
+    fazendo uso de minera\c c\~ ao de textos e aprendizagem de m\' aquina
+    com o objetivo de fornecer uma aplica\c c\~ ao que facilita a pesquisa de textos acad\^ emicos,
+    de interesse de ambos o público em geral e também da comunidade m\' edica,
+    seguindo crit\' erios da OMS.
 
 %-------------------------------------------------------------------------------
 
@@ -173,16 +181,16 @@ O dataset CORD-19 representa a mais extensa cole\c c\~ ao de literatura sobre co
 % TODO: reescrever objetivos espec\' ificos
 {\bf Dentre os principais objetivos espec\' ificos destacam-se: }
 \begin{itemize}
-\item Pesquisa e revis\~ ao bibliogr\' afica sobre t\' ecnicas gerais de minera\c c\~ ao de textos e aprendizagem de m\' aquina
-\item Estudar as caracter\' isticas/informa\c c\~ oes gerais da base CORD-19
-\item Pesquisa e sele\c c\~ ao de quest\~ oes cient\' ificas relevantes referentes à COVID19 e o SARS-CoV-2
-\item Implementa\c c\~ ao de t\' ecnicas identificadas como adequadas à minera\c c\~ ao de
-textos relacionadas às quest\~ oes selecionadas
-\item Interpreta\c c\~ ao/avalia\c c\~ ao dos resultados obtidos
-\item Constru{\c c}\~ ao da aplica{\c c}\~ ao que utiliza das informa{\c c}\~ oes processadas (mineradas) para pesquisa  e recomenda{\c c}\~ ao de artigos relacionados
-\item Reda\c c\~ ao de artigo cient\' ifico para que o aluno possa desenvolver a
-capacidade de escrever de maneira cient\' ifica sobre o pr\' oprio processo de
-pesquisa e os resultados obtidos
+    \item Pesquisa e revis\~ ao bibliogr\' afica sobre t\' ecnicas gerais de minera\c c\~ ao de textos e aprendizagem de m\' aquina
+    \item Estudar as caracter\' isticas/informa\c c\~ oes gerais da base CORD-19
+    \item Pesquisa e sele\c c\~ ao de quest\~ oes cient\' ificas relevantes referentes à COVID19 e o SARS-CoV-2
+    \item Implementa\c c\~ ao de t\' ecnicas identificadas como adequadas à minera\c c\~ ao de
+    textos relacionadas às quest\~ oes selecionadas
+    \item Interpreta\c c\~ ao/avalia\c c\~ ao dos resultados obtidos
+    \item Constru{\c c}\~ ao da aplica{\c c}\~ ao que utiliza das informa{\c c}\~ oes processadas (mineradas) para pesquisa  e recomenda{\c c}\~ ao de artigos relacionados
+    \item Reda\c c\~ ao de artigo cient\' ifico para que o aluno possa desenvolver a
+    capacidade de escrever de maneira cient\' ifica sobre o pr\' oprio processo de
+    pesquisa e os resultados obtidos
 \end{itemize}
 
 %-------------------------------------------------------------------------------
@@ -207,13 +215,13 @@ pesquisa e os resultados obtidos
 
         \item An\' alise dos resultados obtidos pelos algoritmos de minera\c c\~ ao de textos e aprendizado de m\' aquina usados.   \label{a4}
 
-        \item Elaboração e apresentação no tutorial de TCC (Trabalho de conclusão de cuso);  \label{a5}
+        \item Elabora\c c\~ ao e apresenta\c c\~ ao no tutorial de TCC (Trabalho de conclus\~ ao de cuso);  \label{a5}
 
         \item Constru{\c c}\~ ao da aplica{\c c}\~ ao para pesquisa e recomenda{\c c}\~ ao de artigos relacionados;   \label{a6}
 
-         \item Reda{\c c}\~ ao do artigo descrevendo o processo de pesquisa e do resultado obtido;   \label{a7}
+        \item Reda{\c c}\~ ao do artigo descrevendo o processo de pesquisa e do resultado obtido;   \label{a7}
 
-         \item Reda\c c\~ ao da monografia para submiss\~ ao a banca;   \label{a8}
+        \item Reda\c c\~ ao da monografia para submiss\~ ao a banca;   \label{a8}
     
 \end{enumerate}
 
@@ -230,7 +238,7 @@ pesquisa e os resultados obtidos
         \ref{a2} - Estudo da base CORD-19	&$\bullet$&$\bullet$&$\bullet$&	&	&	&	\\ \hline
         \ref{a3} - Implementa\c c\~ ao da ferramenta	&$\bullet$&$\bullet$&$\bullet$&$\bullet$&$\bullet$&	&	\\ \hline
         \ref{a4} - An\' alise dos resultados	&	&$\bullet$&$\bullet$&$\bullet$&$\bullet$&$\bullet$&	\\ \hline
-        \ref{a5} - Elaboração e apresentação no tutorial de TCC	&	&	&	&$\bullet$&	&	&	\\ \hline
+        \ref{a5} - Elabora\c c\~ ao e apresenta\c c\~ ao no tutorial de TCC	&	&	&	&$\bullet$&	&	&	\\ \hline
         \ref{a6} - Constru{\c c}\~ ao da aplica{\c c}\~ ao	&	&$\bullet$&$\bullet$&$\bullet$&$\bullet$&$\bullet$&	\\ \hline
         \ref{a7} -  Reda\c c\~ ao do artigo	&	&	&$\bullet$&$\bullet$&$\bullet$&$\bullet$&	\\ \hline
         \ref{a8} - Reda\c c\~ ao da monografia	&	&	&$\bullet$&$\bullet$&$\bullet$&$\bullet$&$\bullet$	\\ \hline
@@ -247,40 +255,39 @@ pesquisa e os resultados obtidos
 
 \section{Material e M\' etodo}
 
-Para desenvolvimento deste projeto ser\~ ao usados os materiais:
+    Para desenvolvimento deste projeto ser\~ ao usados os materiais:
 
-% Acredito que devo colocar minhas especifica{\c c}\~ oes aqui
-\begin{itemize}
-\item Notebook Acer, 8 GB de memória RAM, 1 TB de HDD, 256 GB de SSD, Intel i7 7ª gera{\c c}\~ ao, Placa de v\' ideo Geforce 940MX;
-\item Linguagem de programa\c c\~ ao javascript, python e suas bibliotecas cient\' ificas (Numpy, Pandas, Scikit-Learn)
-\item Ferramentas open source voltadas especificamente para minera\c c\~ ao de textos (Aika, Rapidminer Text Mining, Data Science Toolkit e KNIME)
-\item Quanto à metodologia de desenvolvimento de software ser\' a adotado modelo iterativo e incremental \cite{pressman2016engenharia}.
-\end{itemize}
+    \begin{itemize}
+        \item Computador Desktop 16 GB de RAM, 2 TB HDD, 240 GB de SSD, AMD 3600, Placa de v\' ideo Geforce 1660;
+        \item Linguagem de programa\c c\~ ao javascript, python e suas bibliotecas cient\' ificas (Numpy, Pandas, Scikit-Learn);
+        \item Ferramentas open source voltadas especificamente para minera\c c\~ ao de textos (Aika, Rapidminer Text Mining, Data Science Toolkit e KNIME);
+        \item Quanto à metodologia de desenvolvimento de software ser\' a adotado modelo iterativo e incremental \cite{pressman2016engenharia}.
+    \end{itemize}
 
-   A pesquisa bibliográfica será desenvolvida com fundamento em \cite{lakatos2001metodologia} nas seguintes etapas:
+   A pesquisa bibliogr\' afica ser\' a desenvolvida com fundamento em \cite{lakatos2001metodologia} nas seguintes etapas:
    \begin{enumerate}
-\item Levantamento bibliográfico preliminar; \label{b1}
-\item Busca das fontes; \label{b2}
-\item Leitura do material; \label{b3}
-\item Redação do texto; \label{b4}
+        \item Levantamento bibliogr\' afico preliminar; \label{b1}
+        \item Busca das fontes; \label{b2}
+        \item Leitura do material; \label{b3}
+        \item Reda\c c\~ ao do texto; \label{b4}
    \end{enumerate}
    
-   Sendo \ref{b1} listado na síntese bibliográfica deste documento. \ref{b2} será feito e documentado posteriormente na redação do texto. Todas estas etapas incorporarão a atividade \ref{a1} citada no cronograma \ref{tabela:cronograma1}.
+   Sendo \ref{b1} listado na síntese bibliogr\' afica deste documento. \ref{b2} ser\' a feito e documentado posteriormente na reda\c c\~ ao do texto. Todas estas etapas incorporar\~ ao a atividade \ref{a1} citada no cronograma \ref{tabela:cronograma1}.
 
-Os dados que serão utilizados durante o processo de mineração são os encontrados no dataset do Kaggle \cite{kaggle20online}, nele contém a literatura médica sobre a doença e vírus o qual a comunidade médica possui interesse de estudo nos dias atuais.
+    Os dados que ser\~ ao utilizados durante o processo de minera\c c\~ ao s\~ ao os encontrados no dataset do Kaggle \cite{kaggle20online}, nele contém a literatura médica sobre a doen\c ca e vírus o qual a comunidade médica possui interesse de estudo nos dias atuais.
 
-O público que este texto está focado é o de ciência da computação pois as técnicas serão discutidas em termos de eficiência algoritmica para eficácia de classificação, já que o objeto a ser manipulado exige entendimento especializado. A aplicação que será desenvolvida já é para o uso da comunidade médica sendo levado em consideração a facilitação de pesquisa e exploração dos tópicos incorporados pelos textos acadêmicos.
+    O público que este texto est\' a focado é o de ciência da computa\c c\~ ao pois as técnicas ser\~ ao discutidas em termos de eficiência algoritmica para efic\' acia de classifica\c c\~ ao, j\' a que o objeto a ser manipulado exige entendimento especializado. A aplica\c c\~ ao que ser\' a desenvolvida j\' a é para o uso da comunidade médica sendo levado em considera\c c\~ ao a facilita\c c\~ ao de pesquisa e explora\c c\~ ao dos tópicos incorporados pelos textos acadêmicos.
 
-A manipulação do texto será feita da seguinte forma: seus abstracts incorporados ao corpo do texto, mantendo uma refêrencia da sua origem para uso posterior; serão limpos e organizados os registros; e serão aplicadas as ferramentas estudadas no período da elaboração da revisão.
+    A manipula\c c\~ ao do texto ser\' a feita da seguinte forma: seus abstracts incorporados ao corpo do texto, mantendo uma refêrencia da sua origem para uso posterior; ser\~ ao limpos e organizados os registros; e ser\~ ao aplicadas as ferramentas estudadas no período da elabora\c c\~ ao da revis\~ ao.
 
-O resultado será analisado em termos de coerência dos clusters a partir dos tópicos incorporados nos textos.
+    O resultado ser\' a analisado em termos de coerência dos clusters a partir dos tópicos incorporados nos textos.
 
 %-----------------------------------------------------------------
 %               CRIT\' ERIOS DE AVALIA\c C\~ AO
 %-----------------------------------------------------------------
 \section{Crit\' erios de Avalia\c c\~ ao} 
 
-	Depois de escolhidas as caracter\' isticas para cria{\c c}\~ ao da matriz de features e feita a redu{\c c}\~ ao de dimensionalidade para realiza{\c c}\~ ao do clustering, teremos um espa{\c c}o preenchido com um cont\' inuo das variáveis latentes. E a qualidade destes clusters, isto é, o qu\~ ao bem definidos seus per\' imetros s\~ ao pode ser medido com um algor\' itmo que define o coeficiente da silhueta.
+	Depois de escolhidas as caracter\' isticas para cria{\c c}\~ ao da matriz de features e feita a redu{\c c}\~ ao de dimensionalidade para realiza{\c c}\~ ao do clustering, teremos um espa{\c c}o preenchido com um cont\' inuo das vari\' aveis latentes. E a qualidade destes clusters, isto é, o qu\~ ao bem definidos seus per\' imetros s\~ ao pode ser medido com um algor\' itmo que define o coeficiente da silhueta.
     
     
     
