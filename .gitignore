@@ -10,3 +10,4 @@ thesis/*/*.out
 thesis/*/*.synctex.gz
 !thesis/Anteprojeto/abntex2/*
 thesis/Anteprojeto/__latexindent_temp.tex
+notebooks/.env
