@@ -1,22 +1,22 @@
 # Query Shape Rules
 
 # One or more operators makes up a query
-root        <- __* value:query __*                          <Value>
-query       <- (value:operator __*)+                        <And>
+root        <- _space_* query _space_*
+query       <- (operator _space_*)+
 
 # There are realy only two kinds of operator: include and exclude
 operator    <- excluding
                 / including
 
 # To exclude, you use a "-" before the query. OR cannot be negated unless it's in a group.
-excluding   <- "-" value:base                               <Excluding>
-including   <- "" value:(or / base)                         <Including>
+excluding   <- "-" base
+including   <- "" (or / base)
 
 # Operators can be grouped with an OR keyword in groups of two or more.
 # I'm not sure if this is the ideal way to do this with PEG but it works for now.
-or          <- value:orable or_groups                       <Or>
-or_groups   <- (or_sep value:orable)+                       <Values>
-orable      <- "" value:base                                <Including>
+or          <- orable or_groups
+or_groups   <- (or_sep orable)+
+orable      <- "" base
 
 # The base operators are the things that make up the query itself.
 # Filters, hashtags, text etc.
@@ -28,25 +28,23 @@ base        <- group
                 / word
 
 # A group is a complete subquery. Recursion!
-group       <- "(" root ")"                                 <Group>
+group       <- "(" root ")"
 
 # Query Syntax Rules
 # These outline the specifics of the syntax
 
-url         <- k:slug               url_sep v:word          <Text>
-pair        <- k:slug               sep v:word              <Pair>
-exact       <- '"' value:([^\"]*) '"'                       <Exactly>
-word        <- "+"? [^\s\)\(]+                              <Text>
+url         <- slug url_sep v:word
+pair        <- slug sep v:word
+exact       <- '"' ([^\"]*) '"'
+word        <- "+"? [^\s\)\(]+
 
-# Utility Rules
-
-or_sep      <- __+ "OR" __+
+or_sep      <- _space_+ "OR" _space_+
 # There's probably a better way to do this
 date        <- d d d d "-" d d "-" d d
-# This is clearly wrong — needs to account for unicode
+# This is clearly wrong
 slug        <- [a-zA-Z0-9_]+
 url_sep     <- "://"
 sep         <- ":"
 integer     <- d d*
 d           <- [0-9]
-__          <- [\s]
+_space_     <- [\s]
