@@ -230,18 +230,18 @@ O site \citeonline{kaggle20online}, que promove competi\c c\~ oes/desafios em ap
 \begin{table}[ht]
     \scriptsize
     \centering
-    \begin{tabular}{|l|c|c|c|c|c|c|c|}
-        \hline &  \multicolumn{7}{|c|}
-        {\textbf{Per\' iodo}} \\ \cline{2-8}
-        \textbf{Atividades}     &Nov      &Dez      &Jan      &Fev      &Mar	&Abr      &Jun	\\ \hline
-        \ref{a1} - Revis\~ ao Bibliogr\' afica	&$\bullet$&$\bullet$&$\bullet$&	&	&	&	\\ \hline
-        \ref{a2} - Estudo da base CORD-19	&$\bullet$&$\bullet$&$\bullet$&	&	&	&	\\ \hline
-        \ref{a3} - Implementa\c c\~ ao da ferramenta	&$\bullet$&$\bullet$&$\bullet$&$\bullet$&$\bullet$&	&	\\ \hline
-        \ref{a4} - An\' alise dos resultados	&	&$\bullet$&$\bullet$&$\bullet$&$\bullet$&$\bullet$&	\\ \hline
-        \ref{a5} - Elabora\c c\~ ao e apresenta\c c\~ ao no tutorial de TCC	&	&	&	&$\bullet$&	&	&	\\ \hline
-        \ref{a6} - Constru{\c c}\~ ao da aplica{\c c}\~ ao	&	&$\bullet$&$\bullet$&$\bullet$&$\bullet$&$\bullet$&	\\ \hline
-        \ref{a7} -  Reda\c c\~ ao do artigo	&	&	&$\bullet$&$\bullet$&$\bullet$&$\bullet$&	\\ \hline
-        \ref{a8} - Reda\c c\~ ao da monografia	&	&	&$\bullet$&$\bullet$&$\bullet$&$\bullet$&$\bullet$	\\ \hline
+    \begin{tabular}{|l|c|c|c|c|c|c|c|c|c|}
+        \hline &  \multicolumn{9}{|c|}
+        {\textbf{Per\' iodo}} \\ \cline{2-10}
+        \textbf{Atividades}     &Nov      &Dez      &Jan      &Fev      &Mar	&Abr      &Jun      &jul      &ago        \\ \hline
+        \ref{a1} - Revis\~ ao Bibliogr\' afica	&$\bullet$&$\bullet$&$\bullet$&	&	&	&	&	&	\\ \hline
+        \ref{a2} - Estudo da base CORD-19	&$\bullet$&$\bullet$&$\bullet$&	&	&	&	&	&	\\ \hline
+        \ref{a3} - Implementa\c c\~ ao da ferramenta	&$\bullet$&$\bullet$&$\bullet$&$\bullet$&$\bullet$&	&	&	&	\\ \hline
+        \ref{a4} - An\' alise dos resultados	&	&$\bullet$&$\bullet$&$\bullet$&$\bullet$&$\bullet$&	&	&	\\ \hline
+        \ref{a5} - Elabora\c c\~ ao e apresenta\c c\~ ao no tutorial de TCC	&	&	&	&$\bullet$&	&	&	&	&	\\ \hline
+        \ref{a6} - Constru{\c c}\~ ao da aplica{\c c}\~ ao	&	&$\bullet$&$\bullet$&$\bullet$&$\bullet$&$\bullet$&	&	&	\\ \hline
+        \ref{a7} -  Reda\c c\~ ao do artigo	&	&	&$\bullet$&$\bullet$&$\bullet$&$\bullet$&	&	&	\\ \hline
+        \ref{a8} - Reda\c c\~ ao da monografia	&	&	&$\bullet$&$\bullet$&$\bullet$&$\bullet$&$\bullet$	&	&	\\ \hline
 %        \ref{a7} - Apresenta{\c c}\~ ao	&	&	&	&$\bullet$&$\bullet$&	\\ \hline
 
    \end{tabular}
@@ -258,7 +258,7 @@ O site \citeonline{kaggle20online}, que promove competi\c c\~ oes/desafios em ap
     Para desenvolvimento deste projeto ser\~ ao usados os materiais:
 
     \begin{itemize}
-        \item Computador Desktop 16 GB de RAM, 2 TB HDD, 240 GB de SSD, AMD 3600, Placa de v\' ideo Geforce 1660;
+        \item Computador Desktop 16 GB de RAM, 2 TB HDD, 500 GB de SSD, AMD 3600, Placa de v\' ideo Geforce 1660;
         \item Linguagem de programa\c c\~ ao javascript, python e suas bibliotecas cient\' ificas (Numpy, Pandas, Scikit-Learn);
         \item Ferramentas open source voltadas especificamente para minera\c c\~ ao de textos (Aika, Rapidminer Text Mining, Data Science Toolkit e KNIME);
         \item Quanto à metodologia de desenvolvimento de software ser\' a adotado modelo iterativo e incremental \cite{pressman2016engenharia}.
@@ -287,8 +287,17 @@ O site \citeonline{kaggle20online}, que promove competi\c c\~ oes/desafios em ap
 %-----------------------------------------------------------------
 \section{Crit\' erios de Avalia\c c\~ ao} 
 
-	Depois de escolhidas as caracter\' isticas para cria{\c c}\~ ao da matriz de features e feita a redu{\c c}\~ ao de dimensionalidade para realiza{\c c}\~ ao do clustering, teremos um espa{\c c}o preenchido com um cont\' inuo das vari\' aveis latentes. E a qualidade destes clusters, isto é, o qu\~ ao bem definidos seus per\' imetros s\~ ao pode ser medido com um algor\' itmo que define o coeficiente da silhueta.
-    
+% descobrir critérios de avaliação mais apropriados para o objetivo final do projeto
+% é muito mais relevante métricas de performance dos modelos em produção
+% visando o objetivo final de utilização da ferramenta
+
+Depois de escolhidas as caracter\' isticas para cria{\c c}\~ ao da matriz de features
+e feita a redu{\c c}\~ ao de dimensionalidade para realiza{\c c}\~ ao do clustering,
+teremos um espa{\c c}o preenchido com um cont\' inuo das vari\' aveis latentes.
+E a qualidade destes clusters, isto é,
+o qu\~ ao bem definidos seus per\' imetros s\~ ao pode ser medido com um algor\' itmo
+que define o coeficiente da silhueta.
+
     
     
 %-----------------------------------------------------------------
