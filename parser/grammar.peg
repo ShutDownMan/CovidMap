@@ -21,7 +21,6 @@ orable      <- "" base
 # The base operators are the things that make up the query itself.
 # Filters, hashtags, text etc.
 base        <- group
-                / list
                 / url
                 / pair
                 / exact
