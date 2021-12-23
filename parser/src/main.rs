@@ -1,7 +1,6 @@
 use json::JsonValue;
 use json::object;
 use json::array;
-use regex::Regex;
 
 peg::parser!{
 	grammar query() for str {
@@ -66,7 +65,7 @@ peg::parser!{
 		rule char_regular() -> String
 			= v:$(quiet!{[_]} / expected!("regular character")) {?
 				let c = v.chars().nth(0).unwrap();
-				if c.is_alphabetic() { Ok(c.to_string()) } else { Err("") }
+				if c.is_alphanumeric() { Ok(c.to_string()) } else { Err("") }
 			}
 
 		rule pair_sep() = ":";
@@ -79,9 +78,54 @@ peg::parser!{
 	}
 }
 
+pub fn ast_to_query(ast: &json::JsonValue) -> String {
+	let root = &ast["query"];
+
+	// println!("{:#}", root.len());
+
+	root.members()
+		.filter_map(|x| { get_query_from_base(x) })
+		.collect::<Vec<String>>()
+		.join(" && ")
+}
+
+fn get_query_from_base(base: &json::JsonValue) -> Option<String> {
+	match base {
+		_ if base.is_string() => {
+			Some(format!("to_tsquery('{}')", base.to_string()))
+		}
+		_ if base.has_key("including") => {
+			get_query_from_base(&base["including"])
+		},
+		_ if base.has_key("excluding") => {
+			Some(format!("!!( {} )", get_query_from_base(&base["excluding"])?))
+		},
+		_ if base.has_key("or") => {
+			Some(base["or"].members()
+				.filter_map(|x| { get_query_from_base(x) })
+				.collect::<Vec<String>>()
+				.join(" || "))
+		},
+		_ if base.has_key("group") => {
+			Some(format!("( {} )", ast_to_query(&base["group"]) ))
+		},
+		_ if base.has_key("exact") => {
+			Some(format!("'{}'::tsquery", base["exact"].to_string()))
+		},
+		_ => { None }
+	}
+}
+
 pub fn main() {
 	// let ast = query::parse(" test OR from:place OR ( sub-query OR \"exactly\" )");
-	let ast = query::parse(r#" test maíz OR from:place OR ( sub-query -other ) OR "éxáćtĺý" "#);
-	println!("{:#}", ast.unwrap());
-	// assert_eq!(list_parser::list("[1,1,2,3,5,8]"), Ok(vec![1, 1, 2, 3, 5, 8]));
+	let ast = query::parse(r#" "pregnant" OR pregnancy (covid OR Sars-Cov-2) (trials OR tests OR experiment) "#).unwrap();
+	println!("{:#}", ast);
+
+	let pg_query = ast_to_query(&ast);
+
+	println!("( {:#} )", pg_query);
+
+	// let docs = query_documents(pg_query);
+
+	// println!("{:#}", docs);
 }
