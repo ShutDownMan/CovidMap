@@ -6,6 +6,10 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+dotenv = "0.15.0"
 json = "0.12.4"
 peg = "0.7.0"
+postgres = "0.19.2"
 regex = "1.5.4"
+
+[features]

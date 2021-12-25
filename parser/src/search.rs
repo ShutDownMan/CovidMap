@@ -2,6 +2,7 @@ use json::JsonValue;
 use json::object;
 
 peg::parser!{
+    /// search query grammar to ast parser
     pub grammar query() for str {
 
         /// One or more operators makes up a query
@@ -16,6 +17,7 @@ peg::parser!{
         rule excluding() -> json::JsonValue
             = "-" v:base() { object!{ "excluding": v } };
 
+        /// included terms
         rule including() -> json::JsonValue
             = "" v:(or() / base()) { object!{ "including": v } };
 
@@ -91,7 +93,7 @@ pub fn ast_to_query(ast: &json::JsonValue) -> String {
 pub fn get_query_from_base(base: &json::JsonValue) -> Option<String> {
     match base {
         _ if base.is_string() => {
-            Some(format!("to_tsquery('{}')", base.to_string()))
+            Some(format!("plainto_tsquery('{}')", base.to_string()))
         }
         _ if base.has_key("including") => {
             get_query_from_base(&base["including"])
