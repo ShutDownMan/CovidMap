@@ -1,89 +1,63 @@
 // Taken from: https://github.com/allenai/rustberta-snli/blob/master/src/modeling.rs
 
-use anyhow::Result;
-use rust_bert::bert::BertConfig;
-use rust_bert::roberta::RobertaForSequenceClassification;
+use tch::{nn, Device};
+use rust_bert::resources::{LocalResource, Resource};
+use rust_bert::roberta::RobertaForQuestionAnswering;
+use rust_tokenizers::tokenizer::RobertaTokenizer;
 use rust_bert::Config;
-use std::collections::HashMap;
-use std::path::Path;
-use tch::{nn, no_grad, Device, Tensor};
+use rust_bert::bert::BertConfig;
+use std::path::PathBuf;
+use std::env;
 
-use crate::common;
-use crate::data::Batch;
 
-pub struct Model {
-    pub classifier: RobertaForSequenceClassification,
-    pub device: tch::Device,
-    pub vs: nn::VarStore,
+pub struct Embedder {
+    tokenizer: RobertaTokenizer,
+    vs: tch::nn::VarStore,
+    model: rust_bert::roberta::RobertaForQuestionAnswering
 }
 
-impl Model {
-    pub fn load<P: AsRef<Path>>(config_path: P, weights_path: P, device: Device) -> Result<Model> {
-        let id2label: HashMap<i64, String> = [
-            (common::label2id("entailment") as i64, "entailment".into()),
-            (
-                common::label2id("contradiction") as i64,
-                "contradiction".into(),
-            ),
-            (common::label2id("neutral") as i64, "neutral".into()),
-        ]
-        .iter()
-        .cloned()
-        .collect();
-        let label2id: HashMap<String, i64> = id2label
-            .iter()
-            .map(|(id, label)| (label.clone(), *id))
-            .collect();
+impl Embedder {
+	pub fn new() -> Embedder {
 
-        let mut config = BertConfig::from_file(config_path);
-        config.id2label = Some(id2label);
-        config.label2id = Some(label2id);
-        config.type_vocab_size = 2;
+        let config_resource = Resource::Local(LocalResource {
+            local_path: PathBuf::from(env::var("TORCH_RESOURCE_PATH").unwrap()),
+        });
 
+        let vocab_resource = Resource::Local(LocalResource {
+            local_path: PathBuf::from(env::var("TORCH_VOCAB_PATH").unwrap()),
+        });
+
+        let merges_resource = Resource::Local(LocalResource {
+            local_path: PathBuf::from(env::var("TORCH_MERGES_PATH").unwrap()),
+        });
+
+        let weights_resource = Resource::Local(LocalResource {
+            local_path: PathBuf::from(env::var("TORCH_WEIGHTS_PATH").unwrap()),
+        });
+
+        let config_path = config_resource.get_local_path().unwrap();
+        let vocab_path = vocab_resource.get_local_path().unwrap();
+        let merges_path = merges_resource.get_local_path().unwrap();
+        let weights_path = weights_resource.get_local_path().unwrap();
+        
+        let device = Device::cuda_if_available();
         let mut vs = nn::VarStore::new(device);
-        let classifier = RobertaForSequenceClassification::new(&vs.root(), &config);
-        vs.load_partial(weights_path)?;
+        let tokenizer: RobertaTokenizer = RobertaTokenizer::from_file(
+            vocab_path.to_str().unwrap(),
+            merges_path.to_str().unwrap(),
+            true,
+            false
+        ).unwrap();
 
-        Ok(Model {
-            classifier,
-            device,
-            vs,
-        })
-    }
-
-    pub fn forward_on_batch(&self, b: Batch) -> Tensor {
-        let result =
-            self.classifier
-                .forward_t(Some(b.token_ids), None, Some(b.type_ids), None, None, false);
-        result.logits
-    }
-
-    pub fn forward_loss(&self, mut b: Batch) -> (Tensor, Tensor) {
-        let labels = b
-            .gold_labels
-            .take()
-            .expect("Batch must have gold labels to calculate loss");
-        let logits = self.forward_on_batch(b);
-        let loss = logits.cross_entropy_for_logits(&labels);
-        let accuracy = logits.accuracy_for_logits(&labels);
-        (loss, accuracy)
-    }
-
-    pub fn predict(&self, b: Batch) -> Vec<&'static str> {
-        let (batch_size, _) = b.size();
-
-        // shape: (batch_size, n_labels)
-        let logits = no_grad(|| self.forward_on_batch(b));
-
-        // shape: (batch_size,)
-        let ids = logits.argmax(-1, false);
-
-        let mut labels = Vec::with_capacity(batch_size as usize);
-        for i in 0..batch_size {
-            let id = ids.int64_value(&[i]);
-            labels.push(common::id2label(id as u8));
-        }
-
-        labels
-    }
+        let config = BertConfig::from_file(config_path);
+        let bert_model = RobertaForQuestionAnswering::new(&vs.root(), &config);
+        vs.load(weights_path).unwrap();
+        
+		Embedder {
+            tokenizer: tokenizer,
+            vs: vs,
+            model: bert_model
+		}
+	}
+    
 }
