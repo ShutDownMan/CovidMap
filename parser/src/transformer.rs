@@ -22,7 +22,7 @@ impl Embedder {
 
 		let sbert_model = SBertRT::new(home).unwrap();
 
-		let texts = ["testing..."];
+		let texts = ["effects of covid on pregnancy and pregnant women"];
 
 		let batch_size = None;
 
@@ -33,7 +33,7 @@ impl Embedder {
 		let sum = output[0].iter().map(|x| x.abs()).sum::<f32>();
 
 		println!("{:#?}", sum);
-		println!("{:#?}", output[0].len());
+		println!("{:#?}", output[0]);
 
 		Embedder { model: sbert_model }
 	}
