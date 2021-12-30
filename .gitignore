@@ -12,3 +12,4 @@ thesis/*/*.synctex.gz
 thesis/Anteprojeto/__latexindent_temp.tex
 notebooks/.env
 parser/target/*
+parser/.env

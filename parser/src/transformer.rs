@@ -1,63 +1,40 @@
+#![allow(unused_imports)]
+#![allow(unused_variables)]
+#![allow(unused_mut)]
+#![allow(dead_code)]
+
 // Taken from: https://github.com/allenai/rustberta-snli/blob/master/src/modeling.rs
+use sbert::SBertRT;
 
-use tch::{nn, Device};
-use rust_bert::resources::{LocalResource, Resource};
-use rust_bert::roberta::RobertaForQuestionAnswering;
-use rust_tokenizers::tokenizer::RobertaTokenizer;
-use rust_bert::Config;
-use rust_bert::bert::BertConfig;
-use std::path::PathBuf;
 use std::env;
-
+use std::path::PathBuf;
 
 pub struct Embedder {
-    tokenizer: RobertaTokenizer,
-    vs: tch::nn::VarStore,
-    model: rust_bert::roberta::RobertaForQuestionAnswering
+	model: SBertRT,
 }
 
 impl Embedder {
 	pub fn new() -> Embedder {
+		let mut home: PathBuf = env::current_dir().unwrap();
+		home.push(env::var("PRETRAINED_MODEL_PATH").unwrap());
 
-        let config_resource = Resource::Local(LocalResource {
-            local_path: PathBuf::from(env::var("TORCH_RESOURCE_PATH").unwrap()),
-        });
+		// println!("{:#?}", home);
 
-        let vocab_resource = Resource::Local(LocalResource {
-            local_path: PathBuf::from(env::var("TORCH_VOCAB_PATH").unwrap()),
-        });
+		let sbert_model = SBertRT::new(home).unwrap();
 
-        let merges_resource = Resource::Local(LocalResource {
-            local_path: PathBuf::from(env::var("TORCH_MERGES_PATH").unwrap()),
-        });
+		let texts = ["testing..."];
 
-        let weights_resource = Resource::Local(LocalResource {
-            local_path: PathBuf::from(env::var("TORCH_WEIGHTS_PATH").unwrap()),
-        });
+		let batch_size = None;
 
-        let config_path = config_resource.get_local_path().unwrap();
-        let vocab_path = vocab_resource.get_local_path().unwrap();
-        let merges_path = merges_resource.get_local_path().unwrap();
-        let weights_path = weights_resource.get_local_path().unwrap();
-        
-        let device = Device::cuda_if_available();
-        let mut vs = nn::VarStore::new(device);
-        let tokenizer: RobertaTokenizer = RobertaTokenizer::from_file(
-            vocab_path.to_str().unwrap(),
-            merges_path.to_str().unwrap(),
-            true,
-            false
-        ).unwrap();
+		let output = sbert_model.forward(&texts.to_vec(), batch_size).unwrap();
 
-        let config = BertConfig::from_file(config_path);
-        let bert_model = RobertaForQuestionAnswering::new(&vs.root(), &config);
-        vs.load(weights_path).unwrap();
-        
-		Embedder {
-            tokenizer: tokenizer,
-            vs: vs,
-            model: bert_model
-		}
+		// println!("{:#?}", output);
+
+		let sum = output[0].iter().map(|x| x.abs()).sum::<f32>();
+
+		println!("{:#?}", sum);
+		println!("{:#?}", output[0].len());
+
+		Embedder { model: sbert_model }
 	}
-    
 }
