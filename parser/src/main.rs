@@ -28,7 +28,8 @@ pub fn main() {
 
 	let mut sentence_transformer = transformer::Embedder::new(&mut database);
 
-	let sem_docs = sentence_transformer.semantic_query("effects of covid on pregnancy and pregnant women");
+	let sem_docs =
+		sentence_transformer.semantic_query("effects of covid on pregnancy and pregnant women");
 
 	println!("{:#?}", sem_docs);
 }

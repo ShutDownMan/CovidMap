@@ -9,7 +9,7 @@ use sbert::SBertRT;
 use std::env;
 use std::path::PathBuf;
 
-use crate::database::{Database, Document};
+use crate::database::{Database, Document, Paragraph};
 use crate::utils::PgVec;
 
 pub struct Embedder<'a> {
@@ -28,7 +28,7 @@ impl<'a> Embedder<'a> {
 		Embedder { model: sbert_model, database: database }
 	}
 
-	pub fn semantic_query(&mut self, query_text: &str) -> Vec<Document> {
+	pub fn semantic_query(&mut self, query_text: &str) -> Vec<Paragraph> {
 		let query_embedding = self.embed_sentence(query_text);
 
 		self.database.find_similar_documents_by_embedding(PgVec(query_embedding), None)

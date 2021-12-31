@@ -52,10 +52,10 @@ impl Database {
 		let rows = self.client.query(&query_template, &[]).unwrap();
 		rows.iter()
 			.map(|row| {
-				let col_paper_id: String = row.get(1);
-				let col_title: Option<String> = row.get(2);
-				let col_abstract_text: Option<String> = row.get(3);
-				let col_body_text: Option<String> = row.get(4);
+				let col_paper_id: String = row.get("paper_id");
+				let col_title: Option<String> = row.get("title");
+				let col_abstract_text: Option<String> = row.get("abstract");
+				let col_body_text: Option<String> = row.get("body");
 
 				Document {
 					paper_id: col_paper_id,
@@ -67,11 +67,12 @@ impl Database {
 			.collect::<Vec<Document>>()
 	}
 
-	pub fn find_similar_documents_by_embedding(&mut self, embedding: PgVec, limit: Option<u32>) -> Vec<Document> {
+	pub fn find_similar_documents_by_embedding(&mut self, embedding: PgVec, limit: Option<u32>) -> Vec<Paragraph> {
 		let query_template = format!(r#"
 			SELECT
-				dot_product_norm_d({0}, embedding) as similarity,
-				paper_id
+				DISTINCT paper_id,
+				paragraph,
+				dot_product_norm_d({0}, embedding) as similarity
 			FROM
 				paragraphs
 			ORDER BY similarity DESC LIMIT {1};
@@ -82,15 +83,21 @@ impl Database {
 		let rows = self.client.query(&query_template, &[]).unwrap();
 		rows.iter()
 			.filter_map(|row| {
-				let col_similarity: f64 = row.get(0);
-				let col_paper_id: Option<String> = row.get(1);
+				// let col_similarity: f64 = row.get("similarity");
+				let col_paper_id: String = row.get("paper_id");
+				let col_paragraph: String = row.get("paragraph");
 
-				self.get_paper_by_id(col_paper_id.unwrap().as_str())
+				// self.get_paper_by_id(col_paper_id.unwrap().as_str())
+
+				Some(Paragraph {
+					paper_id: col_paper_id,
+					text: col_paragraph
+				})
 			})
-			.collect::<Vec<Document>>()
+			.collect::<Vec<Paragraph>>()
 	}
 
-	pub fn get_paper_by_id(&mut self, paper_id: &str) -> Option<Document> {
+	pub fn _get_paper_by_id(&mut self, paper_id: &str) -> Option<Document> {
 		let query_template = format!(r#"
 			SELECT
 				*
@@ -107,10 +114,10 @@ impl Database {
 			.ok()?
 			.first()
 			.map(|row| {
-				let col_paper_id: String = row.get(0);
-				let col_title: Option<String> = row.get(1);
-				let col_abstract_text: Option<String> = row.get(2);
-				let col_body_text: Option<String> = row.get(3);
+				let col_paper_id: String = row.get("paper_id");
+				let col_title: Option<String> = row.get("title");
+				let col_abstract_text: Option<String> = row.get("abstract");
+				let col_body_text: Option<String> = row.get("body");
 
 				Document {
 					paper_id: col_paper_id,
@@ -137,13 +144,13 @@ pub struct Document {
 
 impl std::fmt::Debug for Document {
 	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-		let m_paper_id = &self.paper_id;
+		let m_paper_id = self.paper_id.clone();
 		let m_title = self.title.clone().unwrap_or("?TITLE?".to_owned());
 		let m_abstract_text = self
 			.abstract_text
 			.clone()
 			.unwrap_or("?ABSTRACT?".to_owned());
-		let end = m_abstract_text.chars().map(|c| c.len_utf8()).take(50).sum();
+		let end = m_abstract_text.chars().map(|c| c.len_utf8()).take(100).sum();
 
 		write!(
 			f,
@@ -151,6 +158,26 @@ impl std::fmt::Debug for Document {
 			&m_paper_id,
 			&m_title,
 			&m_abstract_text[..end]
+		)
+	}
+}
+
+
+pub struct Paragraph {
+	paper_id: String,
+	text: String
+}
+
+impl std::fmt::Debug for Paragraph {
+	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+		let m_paper_id = self.paper_id.clone();
+		let m_text = self.text.clone();
+
+		write!(
+			f,
+			"{{[{}]: {}}}",
+			&m_paper_id,
+			&m_text
 		)
 	}
 }
