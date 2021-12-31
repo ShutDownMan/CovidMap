@@ -1,10 +1,12 @@
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-#![allow(unused_mut)]
-#![allow(dead_code)]
+// #![allow(unused_imports)]
+// #![allow(unused_variables)]
+// #![allow(unused_mut)]
+// #![allow(dead_code)]
 
-use postgres::{Client, Error, NoTls};
+use postgres::{Client, NoTls};
 use std::env;
+
+use crate::utils::PgVec;
 
 pub struct Database {
 	client: Client,
@@ -29,7 +31,7 @@ impl Database {
 		Client::connect(&connection_string, NoTls).unwrap()
 	}
 
-	pub fn match_query_documents(&mut self, ts_match: String) -> Vec<Document> {
+	pub fn match_query(&mut self, ts_match: String) -> Vec<Document> {
 		let query_template = format!(
 			r#"
 			SELECT
@@ -64,6 +66,60 @@ impl Database {
 			})
 			.collect::<Vec<Document>>()
 	}
+
+	pub fn find_similar_documents_by_embedding(&mut self, embedding: PgVec, limit: Option<u32>) -> Vec<Document> {
+		let query_template = format!(r#"
+			SELECT
+				dot_product_norm_d({0}, embedding) as similarity,
+				paper_id
+			FROM
+				paragraphs
+			ORDER BY similarity DESC LIMIT {1};
+		"#, embedding.to_string(), limit.unwrap_or(20));
+
+		// println!("{:#?}", query_template);
+
+		let rows = self.client.query(&query_template, &[]).unwrap();
+		rows.iter()
+			.filter_map(|row| {
+				let col_similarity: f64 = row.get(0);
+				let col_paper_id: Option<String> = row.get(1);
+
+				self.get_paper_by_id(col_paper_id.unwrap().as_str())
+			})
+			.collect::<Vec<Document>>()
+	}
+
+	pub fn get_paper_by_id(&mut self, paper_id: &str) -> Option<Document> {
+		let query_template = format!(r#"
+			SELECT
+				*
+			FROM
+				papers
+			WHERE
+				paper_id = '{0}'
+			;
+		"#, paper_id);
+
+		// println!("{:#?}", paper_id);
+
+		self.client.query(&query_template, &[])
+			.ok()?
+			.first()
+			.map(|row| {
+				let col_paper_id: String = row.get(0);
+				let col_title: Option<String> = row.get(1);
+				let col_abstract_text: Option<String> = row.get(2);
+				let col_body_text: Option<String> = row.get(3);
+
+				Document {
+					paper_id: col_paper_id,
+					title: col_title,
+					abstract_text: col_abstract_text,
+					body_text: col_body_text,
+				}
+			})
+	}
 }
 
 pub struct Document {
@@ -83,7 +139,8 @@ impl std::fmt::Debug for Document {
 	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
 		let m_paper_id = &self.paper_id;
 		let m_title = self.title.clone().unwrap_or("?TITLE?".to_owned());
-		let m_abstract_text = self.abstract_text
+		let m_abstract_text = self
+			.abstract_text
 			.clone()
 			.unwrap_or("?ABSTRACT?".to_owned());
 		let end = m_abstract_text.chars().map(|c| c.len_utf8()).take(50).sum();
