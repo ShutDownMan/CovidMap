@@ -9,16 +9,18 @@ pub fn main() {
 	dotenv::dotenv().expect("Failed to read .env file");
 
 	// let ast = query::parse(" test OR from:place OR ( sub-query OR \"exactly\" )");
-	let ast = search::query::parse(
-		r#" "pregnant" OR pregnancy (covid OR Sars-Cov-2) (trials OR tests OR experiment) "#,
-	)
-	.unwrap();
-	// let ast = search::query::parse(r#" covid "#).unwrap();
-	println!("{:#}", ast);
+	let ast = search::query::parse(r#" covid "#).unwrap();
 
-	let pg_query = search::ast_to_query(&ast);
+	// let ast = search::query::parse(
+	// 	r#" "pregnant" OR pregnancy (covid OR Sars-Cov-2) (trials OR tests OR experiment) "#,
+	// )
+	// .unwrap();
 
-	println!("{:#}", pg_query);
+	// println!("{:#}", ast);
+
+	// let pg_query = search::ast_to_query(&ast);
+
+	// println!("{:#}", pg_query);
 
 	let mut database = database::Database::new();
 

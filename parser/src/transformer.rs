@@ -31,6 +31,8 @@ impl<'a> Embedder<'a> {
 	pub fn semantic_query(&mut self, query_text: &str) -> Vec<Paragraph> {
 		let query_embedding = self.embed_sentence(query_text);
 
+		// println!("{:#?}", query_embedding);
+
 		self.database.find_similar_documents_by_embedding(PgVec(query_embedding), None)
 	}
 
