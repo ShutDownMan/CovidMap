@@ -32,8 +32,7 @@ impl Database {
 	}
 
 	pub fn match_query(&mut self, ts_match: String) -> Vec<Paragraph> {
-		let query_template = format!(
-			r#"
+		let query_template = format!(r#"
 			SELECT
 				ts_rank("tsv", ({0})) AS "rank",
 				paper_id,
@@ -85,11 +84,11 @@ impl Database {
 		let rows = self.client.query(&query_template, &[]).unwrap();
 		rows.iter()
 			.filter_map(|row| {
-				let col_similarity: f64 = row.get("similarity");
+				// let col_similarity: f64 = row.get("similarity");
 				let col_paper_id: String = row.get("paper_id");
 				let col_paragraph: String = row.get("content");
 
-				println!("{:#?}", col_similarity);
+				// println!("{:#?}", col_similarity);
 
 				// self.get_paper_by_id(col_paper_id.unwrap().as_str())
 
