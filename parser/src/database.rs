@@ -32,7 +32,8 @@ impl Database {
 	}
 
 	pub fn match_query(&mut self, ts_match: String) -> Vec<Paragraph> {
-		let query_template = format!(r#"
+		let query_template = format!(
+			r#"
 			SELECT
 				ts_rank("tsv", ({0})) AS "rank",
 				paper_id,
@@ -41,9 +42,9 @@ impl Database {
 				paragraphs
 			WHERE
 				tsv @@ ({0})
-			ORDER BY rank DESC LIMIT 20
-		"#,
-			&ts_match
+			ORDER BY rank DESC LIMIT {1}
+			"#,
+			&ts_match, 20
 		);
 
 		let rows = self.client.query(&query_template, &[]).unwrap();
@@ -67,15 +68,19 @@ impl Database {
 	) -> Vec<Paragraph> {
 		let query_template = format!(
 			r#"
-			SELECT
-				DISTINCT paper_id,
-				{0} <=> embedding AS similarity,
-				content
-			FROM
-				paragraphs
-			ORDER BY similarity ASC LIMIT {1};
-		"#,
+				SELECT
+					DISTINCT paper_id,
+					{0} <=> embedding AS similarity,
+					content,
+					rank_factor
+				FROM
+					paragraphs
+				WHERE
+					rank_factor = {1}
+				ORDER BY similarity ASC LIMIT {2};
+			"#,
 			embedding.to_string(),
+			'A',
 			limit.unwrap_or(20)
 		);
 
