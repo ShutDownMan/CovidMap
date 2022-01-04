@@ -28,7 +28,7 @@ impl<'a> Embedder<'a> {
 		Embedder { model: sbert_model, database: database }
 	}
 
-	pub fn semantic_query(&mut self, query_text: &str) -> Vec<Paragraph> {
+	pub fn semantic_query(&mut self, query_text: &str) -> Vec<Document> {
 		let query_embedding = self.embed_sentence(query_text);
 
 		// println!("{:#?}", query_embedding);

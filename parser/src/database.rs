@@ -31,15 +31,17 @@ impl Database {
 		Client::connect(&connection_string, NoTls).unwrap()
 	}
 
-	pub fn match_query(&mut self, ts_match: String) -> Vec<Paragraph> {
+	pub fn match_query(&mut self, ts_match: String) -> Vec<Document> {
 		let query_template = format!(
 			r#"
 			SELECT
 				ts_rank("tsv", ({0})) AS "rank",
 				paper_id,
-				content
+				title,
+				abstract,
+				body
 			FROM
-				paragraphs
+				papers
 			WHERE
 				tsv @@ ({0})
 			ORDER BY rank DESC LIMIT {1}
@@ -51,36 +53,38 @@ impl Database {
 		rows.iter()
 			.map(|row| {
 				let col_paper_id: String = row.get("paper_id");
-				let col_content: String = row.get("content");
+				let col_title: String = row.get("title");
+				let col_abstract: String = row.get("abstract");
+				let col_body: String = row.get("body");
 
-				Paragraph {
+				Document {
 					paper_id: col_paper_id,
-					text: col_content,
+					title: Some(col_title),
+					abstract_text: Some(col_abstract),
+					body_text: Some(col_body)
 				}
 			})
-			.collect::<Vec<Paragraph>>()
+			.collect::<Vec<Document>>()
 	}
 
 	pub fn find_similar_documents_by_embedding(
 		&mut self,
 		embedding: PgVec,
 		limit: Option<u32>,
-	) -> Vec<Paragraph> {
+	) -> Vec<Document> {
 		let query_template = format!(
 			r#"
 				SELECT
 					DISTINCT paper_id,
-					{0} <=> embedding AS similarity,
-					content,
-					rank_factor
+					{0} <=> abstract_embedding AS similarity,
+					title,
+					abstract,
+					body
 				FROM
-					paragraphs
-				WHERE
-					rank_factor = {1}
-				ORDER BY similarity ASC LIMIT {2};
+					papers
+				ORDER BY similarity ASC LIMIT {1};
 			"#,
 			embedding.to_string(),
-			'A',
 			limit.unwrap_or(20)
 		);
 
@@ -91,18 +95,21 @@ impl Database {
 			.filter_map(|row| {
 				// let col_similarity: f64 = row.get("similarity");
 				let col_paper_id: String = row.get("paper_id");
-				let col_paragraph: String = row.get("content");
-
+				let col_title: String = row.get("title");
+				let col_abstract: String = row.get("abstract");
+				let col_body: String = row.get("body");
 				// println!("{:#?}", col_similarity);
 
 				// self.get_paper_by_id(col_paper_id.unwrap().as_str())
 
-				Some(Paragraph {
+				Some(Document {
 					paper_id: col_paper_id,
-					text: col_paragraph,
+					title: Some(col_title),
+					abstract_text: Some(col_abstract),
+					body_text: Some(col_body)
 				})
 			})
-			.collect::<Vec<Paragraph>>()
+			.collect::<Vec<Document>>()
 	}
 
 	pub fn _get_paper_by_id(&mut self, paper_id: &str) -> Option<Document> {
@@ -131,6 +138,8 @@ impl Database {
 				Document {
 					paper_id: col_paper_id,
 					title: col_title,
+					abstract_text: None,
+					body_text: None
 				}
 			})
 	}
@@ -139,6 +148,8 @@ impl Database {
 pub struct Document {
 	paper_id: String,
 	title: Option<String>,
+	abstract_text: Option<String>,
+	body_text: Option<String>,
 }
 
 impl std::fmt::Debug for Document {
