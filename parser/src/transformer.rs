@@ -28,12 +28,12 @@ impl<'a> Embedder<'a> {
 		Embedder { model: sbert_model, database: database }
 	}
 
-	pub fn semantic_query(&mut self, query_text: &str) -> Vec<Document> {
+	pub async fn semantic_query(&mut self, query_text: &str) -> Vec<Document> {
 		let query_embedding = self.embed_sentence(query_text);
 
 		// println!("{:#?}", query_embedding);
 
-		self.database.find_similar_documents_by_embedding(PgVec(query_embedding), None)
+		self.database.find_similar_documents_by_embedding(PgVec(query_embedding), None).await
 	}
 
 	fn embed_sentence(&self, text: &str) -> Vec<f32> {

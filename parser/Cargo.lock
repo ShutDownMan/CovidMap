@@ -1258,9 +1258,10 @@ dependencies = [
  "dotenv",
  "json",
  "peg",
- "postgres",
  "regex",
  "sbert",
+ "tokio 1.15.0",
+ "tokio-postgres",
 ]
 
 [[package]]
@@ -1357,20 +1358,6 @@ name = "pkg-config"
 version = "0.3.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "58893f751c9b0412871a09abd62ecd2a00298c6c83befa223ef98c52aef40cbe"
-
-[[package]]
-name = "postgres"
-version = "0.19.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eb76d6535496f633fa799bb872ffb4790e9cbdedda9d35564ca0252f930c0dd5"
-dependencies = [
- "bytes 1.1.0",
- "fallible-iterator",
- "futures",
- "log",
- "tokio 1.15.0",
- "tokio-postgres",
-]
 
 [[package]]
 name = "postgres-protocol"
@@ -1824,6 +1811,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "signal-hook-registry"
+version = "1.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e51e73328dc4ac0c7ccbda3a494dfa03df1de2f46018127f60c693f2648455b0"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "siphasher"
 version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2065,8 +2061,24 @@ dependencies = [
  "libc",
  "memchr",
  "mio 0.7.14",
+ "num_cpus",
+ "once_cell",
+ "parking_lot",
  "pin-project-lite 0.2.7",
+ "signal-hook-registry",
+ "tokio-macros",
  "winapi 0.3.9",
+]
+
+[[package]]
+name = "tokio-macros"
+version = "1.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b557f72f448c511a979e2564e55d74e6c4432fc96ff4f6241bc6bded342643b7"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]

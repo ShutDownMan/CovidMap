@@ -9,9 +9,10 @@ edition = "2021"
 dotenv = "0.15.0"
 json = "0.12.4"
 peg = "0.7.0"
-postgres = "0.19.2"
 regex = "1.5.4"
 sbert = { git = "https://github.com/cpcdoy/rust-sbert/", branch = "character_bert" }
+tokio = { version = "1.15.0", features = ["full"] }
+tokio-postgres = "0.7.5"
 
 [features]
 

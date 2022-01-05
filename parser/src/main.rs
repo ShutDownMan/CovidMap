@@ -2,10 +2,13 @@ mod database;
 mod search;
 mod transformer;
 mod utils;
+mod indexer;
 
+use tokio;
 use dotenv;
 
-pub fn main() {
+#[tokio::main]
+async fn main() {
 	dotenv::dotenv().expect("Failed to read .env file");
 
 	// let ast = query::parse(" test OR from:place OR ( sub-query OR \"exactly\" )");
@@ -22,18 +25,20 @@ pub fn main() {
 
 	println!("{:#}", pg_query);
 
-	let mut database = database::Database::new();
+	let mut database = database::Database::new().await.unwrap();
 
-	let docs = database.match_query(pg_query);
+	let docs = database.match_query(pg_query).await;
 
 	println!("{:#?}", docs);
 
-	let mut sentence_transformer = transformer::Embedder::new(&mut database);
+	// let mut sentence_transformer = transformer::Embedder::new(&mut database);
 
-	let sem_docs =
-		sentence_transformer.semantic_query("which socioeconomical impacts does the coronavírus have on underdeveloped countries");
+	// let sem_docs =
+	// 	sentence_transformer.semantic_query("what are the effective medication and safety approaches to coronavírus disease");
 
-	println!("{:#?}", sem_docs);
+	// println!("{:#?}", sem_docs);
+
+	// let paper_indexer = indexer::Indexer::new(&database);
 }
 
 
@@ -43,6 +48,6 @@ pub fn main() {
 "what are the long term effects of corona virus disease Sars-Cov-2"
 "how can the coronavirus mutation occour"
 "which socioeconomical impacts does the coronavírus have on under developed countries"
-
+"what are the effective medication and safety approaches to coronavírus disease"
 
 */
