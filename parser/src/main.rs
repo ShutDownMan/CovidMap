@@ -31,10 +31,10 @@ async fn main() {
 
 	println!("{:#?}", docs);
 
-	// let mut sentence_transformer = transformer::Embedder::new(&mut database);
+	let mut sentence_transformer = transformer::Embedder::new(&mut database);
 
-	// let sem_docs =
-	// 	sentence_transformer.semantic_query("what are the effective medication and safety approaches to coronavírus disease");
+	let sem_docs =
+		sentence_transformer.semantic_query("what are the effects of coronavirus or covid on pregnant women?");
 
 	// println!("{:#?}", sem_docs);
 
