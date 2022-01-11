@@ -12,20 +12,23 @@ use std::path::PathBuf;
 use crate::database::{Database, Document, Paragraph};
 use crate::utils::PgVec;
 
-pub struct Embedder<'a> {
+use std::sync::Arc;
+use tokio::sync::Mutex;
+
+pub struct Embedder {
 	model: SBertRT,
-	database: &'a mut Database
+	database: Arc<Mutex<Database>>,
 }
 
-impl<'a> Embedder<'a> {
+impl Embedder {
 	/// create a sentence embedder instance
-	pub fn new(database: &'a mut Database) -> Embedder {
+	pub fn new(database: &Arc<Mutex<Database>>) -> Embedder {
 		let mut home: PathBuf = env::current_dir().unwrap();
 		home.push(env::var("PRETRAINED_MODEL_PATH").unwrap());
 
 		let sbert_model = SBertRT::new(home).unwrap();
 
-		Embedder { model: sbert_model, database: database }
+		Embedder { model: sbert_model, database: database.clone() }
 	}
 
 	pub async fn semantic_query(&mut self, query_text: &str) -> Vec<Document> {
@@ -33,10 +36,11 @@ impl<'a> Embedder<'a> {
 
 		// println!("{:#?}", query_embedding);
 
-		self.database.find_similar_documents_by_embedding(PgVec(query_embedding), None).await
+		let db = self.database.lock().await;
+		db.find_similar_documents_by_embedding(query_embedding, None).await
 	}
 
-	fn embed_sentence(&self, text: &str) -> Vec<f32> {
-		self.model.forward(&[text], None).unwrap().remove(0)
+	pub fn embed_sentence(&self, text: &str) -> PgVec {
+		PgVec(self.model.forward(&[text], None).unwrap().remove(0))
 	}
 }

@@ -11,9 +11,14 @@ use std::env;
 use crate::utils::PgVec;
 
 pub struct Database {
-	client: Client,
+	pub client: Client,
 }
 
+impl std::fmt::Debug for Database {
+	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+		write!(f, "{:#?}", self.client)
+	}
+}
 impl Database {
 	pub async fn new() -> Result<Database, Error> {
 		let connection_string = format!(
@@ -63,20 +68,29 @@ impl Database {
 
 		// println!("{:#?}", rows);
 		rows.iter()
-			.map(|row| {
-				let col_paper_id: String = row.get("paper_id");
-				let col_title: String = row.get("title");
-				let col_abstract: String = row.get("abstract");
-				let col_body: String = row.get("body");
-
-				Document {
-					paper_id: col_paper_id,
-					title: Some(col_title),
-					abstract_text: Some(col_abstract),
-					body_text: Some(col_body),
-				}
-			})
+			.filter_map(|row| self.get_document_from_row(row).ok())
 			.collect::<Vec<Document>>()
+	}
+
+	fn get_document_from_row(
+		&self,
+		row: &tokio_postgres::Row,
+	) -> Result<Document, Box<dyn std::error::Error>> {
+		let col_paper_id: String = row.try_get("paper_id")?;
+		let col_title: String = row.try_get("title")?;
+		let col_abstract: String = row.try_get("abstract")?;
+		let col_body: String = row.try_get("body")?;
+		let col_abstract_embedding: Vec<f32> = row.try_get("abstract_embedding")?;
+		let col_body_embedding: Vec<f32> = row.try_get("body_embedding")?;
+
+		Ok(Document {
+			paper_id: col_paper_id,
+			title: Some(col_title),
+			abstract_text: Some(col_abstract),
+			body_text: Some(col_body),
+			abstract_embedding: Some(PgVec(col_abstract_embedding)),
+			body_embedding: Some(PgVec(col_body_embedding)),
+		})
 	}
 
 	pub async fn find_similar_documents_by_embedding(
@@ -107,23 +121,7 @@ impl Database {
 			.await
 			.unwrap();
 		rows.iter()
-			.filter_map(|row| {
-				// let col_similarity: f64 = row.get("similarity");
-				let col_paper_id: String = row.get("paper_id");
-				let col_title: String = row.get("title");
-				let col_abstract: String = row.get("abstract");
-				let col_body: String = row.get("body");
-				// println!("{:#?}", col_similarity);
-
-				// self.get_paper_by_id(col_paper_id.unwrap().as_str())
-
-				Some(Document {
-					paper_id: col_paper_id,
-					title: Some(col_title),
-					abstract_text: Some(col_abstract),
-					body_text: Some(col_body),
-				})
-			})
+			.filter_map(|row| self.get_document_from_row(row).ok())
 			.collect::<Vec<Document>>()
 	}
 
@@ -143,29 +141,75 @@ impl Database {
 
 		// println!("{:#?}", paper_id);
 
+		let rows = self.client.query(&query_template, &[]).await.ok()?;
+
+		self.get_document_from_row(rows.first()?).ok()
+	}
+
+	pub async fn insert_document(
+		&mut self,
+		document: &Document,
+	) -> Result<(), Box<dyn std::error::Error>> {
+		// let query_template = format!(
+		// 	r#"
+		// 	INSERT INTO papers
+		// 		(paper_id, title, abstract, body, abstract_embedding, body_embedding)
+		// 	VALUES
+		// 		('{0:}', '{1:}', '{2:}', '{3:}', {4:}, {5:})
+		// 	ON CONFLICT ON CONSTRAINT papers_pkey DO UPDATE SET
+		// 		title = '{1:}',
+		// 		abstract = '{2:}',
+		// 		body = '{3:}',
+		// 		abstract_embedding = {4:},
+		// 		body_embedding = {5:}
+		// "#,
+		// );
+		let query_template = r#"
+			INSERT INTO papers
+				(paper_id, title, abstract, body, abstract_embedding, body_embedding)
+			VALUES
+				($1, $2, $3, $4, $5, $6)
+			ON CONFLICT ON CONSTRAINT papers_pkey DO UPDATE SET
+				title = $2,
+				abstract = $3,
+				body = $4,
+				abstract_embedding = $5,
+				body_embedding = $6
+		"#;
+
+		// println!("{}", &document.title.clone().unwrap_or(String::from("")));
+		println!("{}", query_template);
+
 		self.client
-			.query(&query_template, &[])
-			.await
-			.ok()?
-			.first()
-			.map(|row| {
-				let col_paper_id: String = row.get("paper_id");
-				let col_title: Option<String> = row.get("title");
-				Document {
-					paper_id: col_paper_id,
-					title: col_title,
-					abstract_text: None,
-					body_text: None,
-				}
-			})
+			.query(
+				query_template,
+				&[
+					&document.paper_id.to_string(),
+					&document.title.clone().unwrap_or(String::from("?TITLE?")),
+					&document
+						.abstract_text
+						.clone()
+						.unwrap_or(String::from("?ABSTRACT?")),
+					&document.body_text.clone().unwrap_or(String::from("?BODY?")),
+					&document.abstract_embedding.as_ref().unwrap(),
+					&document.body_embedding.as_ref().unwrap(),
+				],
+			)
+			.await?;
+
+		println!("{:#?}", document);
+
+		Ok(())
 	}
 }
 
 pub struct Document {
-	paper_id: String,
-	title: Option<String>,
-	abstract_text: Option<String>,
-	body_text: Option<String>,
+	pub paper_id: String,
+	pub title: Option<String>,
+	pub abstract_text: Option<String>,
+	pub body_text: Option<String>,
+	pub abstract_embedding: Option<PgVec>,
+	pub body_embedding: Option<PgVec>,
 }
 
 impl std::fmt::Debug for Document {

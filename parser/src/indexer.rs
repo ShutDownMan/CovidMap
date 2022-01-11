@@ -1,86 +1,62 @@
-use crate::database::Database;
+use crate::database::{Database, Document};
+use crate::transformer::Embedder;
+use crate::utils::PgVec;
 
-pub struct Indexer<'a> {
-	database: &'a Database,
+use std::sync::Arc;
+use tokio::sync::Mutex;
+
+pub struct Indexer {
+	database: Arc<Mutex<Database>>,
+	embedder: Arc<Mutex<Embedder>>,
 }
 
-impl<'a> Indexer<'a> {
-	pub fn new(database: &Database) -> Indexer {
-		Indexer { database: database }
-	}
-
-	pub async fn insert_from_csv(csv_path: String) {}
-}
-
-use std::fs::File;
-use std::io::{BufRead, BufReader, Cursor, Write, Seek, SeekFrom};
-use std::collections::HashMap;
-use regex::Regex;
-
-pub struct IndexableCSV {
-	path: String,
-	file: File,
-	header: Vec<String>,
-	offsets: Vec<usize>,
-}
-
-impl IndexableCSV {
-	pub fn new(path: String) -> IndexableCSV {
-		let mut file = File::open(&path).expect("Something went wrong reading the file");
-
-		let header = IndexableCSV::get_file_header(&mut file);
-		let offsets = IndexableCSV::get_file_offsets(&mut file);
-
-		IndexableCSV {
-			path,
-			file,
-			header,
-			offsets,
+impl Indexer {
+	pub fn new(database: &Arc<Mutex<Database>>, embedder: &Arc<Mutex<Embedder>>) -> Indexer {
+		Indexer {
+			database: database.clone(),
+			embedder: embedder.clone(),
 		}
 	}
 
-	pub fn get_file_header(file: &mut File) -> Vec<String> {
-		let mut buf: String = String::from("");
+	pub async fn insert_papers_from_csv(
+		self,
+		csv_path: &str,
+	) -> Result<(), Box<dyn std::error::Error>> {
+		let csv_reader = csv::Reader::from_path(csv_path)?;
 
-		BufReader::new(file).read_line(&mut buf);
+		for paper in csv_reader.into_records() {
+			if let Ok(paper) = paper {
+				let paper_id: String = paper[0].to_string();
+				let title: Option<String> = Some(paper[1].to_string());
+				let abstract_text: Option<String> = Some(paper[2].to_string());
+				let body_text: Option<String> = Some(paper[3].to_string());
 
-		buf.split(',')
-			.map(|x| String::from(x))
-			.collect::<Vec<String>>()
-	}
+				let db = Arc::clone(&self.database);
+				let embedder = Arc::clone(&self.embedder);
+				tokio::spawn(async move {
+					let embedder = embedder.lock().await;
 
-	pub fn get_file_offsets(file: &mut File) -> Vec<usize> {
-		BufReader::new(file)
-			.lines()
-			.skip(1)
-			.map(|line| {
-				line
-					.unwrap_or(String::from(""))
-					.len()
-			})
-			.collect::<Vec<usize>>()
-	}
+					let abstract_embedding = Some(embedder.embed_sentence(&abstract_text.clone().unwrap()));
+					let body_embedding = Some(embedder.embed_sentence(&body_text.clone().unwrap()));
+	
+					drop(embedder);
+	
+					let document = Document {
+						paper_id,
+						title,
+						abstract_text,
+						body_text,
+						abstract_embedding,
+						body_embedding,
+					};
+	
+					let mut db = db.lock().await;
 
-	pub fn get_row(&mut self, i: usize) -> HashMap<&String, String> {
-		self.file.seek(SeekFrom::Start(self.offsets[i].try_into().unwrap()));
-
-		let mut buf: String = String::from("");
-		BufReader::new(&mut self.file).read_line(&mut buf);
-
-		let row = Regex::new(r"").unwrap()
-			.split(&buf)
-			.map(|x| x.to_string())
-			.collect::<Vec<String>>();
-
-		let mut dict = HashMap::new();
-		for (ind, column) in self.header.iter().enumerate() {
-			dict.insert(column, row[ind].clone());
+					db.insert_document(&document).await.unwrap();
+				});
+			}
 		}
 
-		dict
-	}
-
-	pub fn len(&self) -> usize {
-		self.offsets.len()
+		Ok(())
 	}
 }
