@@ -5,6 +5,8 @@ use crate::utils::PgVec;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
+use futures::future::join_all;
+
 pub struct Indexer {
 	database: Arc<Mutex<Database>>,
 	embedder: Arc<Mutex<Embedder>>,
@@ -24,6 +26,8 @@ impl Indexer {
 	) -> Result<(), Box<dyn std::error::Error>> {
 		let csv_reader = csv::Reader::from_path(csv_path)?;
 
+		let mut t_papers = vec![];
+
 		for paper in csv_reader.into_records() {
 			if let Ok(paper) = paper {
 				let paper_id: String = paper[0].to_string();
@@ -33,29 +37,39 @@ impl Indexer {
 
 				let db = Arc::clone(&self.database);
 				let embedder = Arc::clone(&self.embedder);
-				tokio::spawn(async move {
-					let embedder = embedder.lock().await;
 
-					let abstract_embedding = Some(embedder.embed_sentence(&abstract_text.clone().unwrap()));
-					let body_embedding = Some(embedder.embed_sentence(&body_text.clone().unwrap()));
-	
-					drop(embedder);
-	
+				t_papers.push(tokio::spawn(async move {
+
+					// get hold of the embedder
+					let embedder_lock = embedder.lock().await;
+
+					// get embeddings for abstract and body
+					let abstract_embedding =
+						Some(embedder_lock.embed_sentence(&abstract_text.clone().unwrap()));
+
+					// drop embedder as it can be used by the other threads
+					drop(embedder_lock);
+
+					// create document struct
 					let document = Document {
 						paper_id,
 						title,
 						abstract_text,
 						body_text,
-						abstract_embedding,
-						body_embedding,
+						abstract_embedding
 					};
-	
-					let mut db = db.lock().await;
+					// get a hold of the database
+					let db_lock = db.lock().await;
 
-					db.insert_document(&document).await.unwrap();
-				});
+					// insert document into database
+					db_lock.insert_document(document).await.unwrap();
+					drop(db_lock);
+			
+				}));
 			}
 		}
+
+		join_all(t_papers).await;
 
 		Ok(())
 	}

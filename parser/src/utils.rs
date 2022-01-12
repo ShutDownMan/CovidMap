@@ -27,11 +27,3 @@ impl fmt::Debug for PgVec {
         )
     }
 }
-
-// impl tokio_postgres::types::ToSql for PgVec {
-//     fn to_sql(&self, ty: &PgVec, out: &mut BytesMut) {
-
-//     }
-
-//     // to_sql_checked!()
-// }

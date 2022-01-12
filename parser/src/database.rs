@@ -3,8 +3,7 @@
 // #![allow(unused_mut)]
 // #![allow(dead_code)]
 
-use tokio_postgres::tls::NoTlsStream;
-use tokio_postgres::{Client, Connection, Error, NoTls, Socket};
+use tokio_postgres::{Client, Error, NoTls};
 
 use std::env;
 
@@ -41,8 +40,6 @@ impl Database {
 		Ok(Database { client: client })
 	}
 
-	async fn init_database_connection() {}
-
 	pub async fn match_query(&mut self, ts_match: String) -> Vec<Document> {
 		let limit: Option<u32> = Some(20);
 
@@ -53,7 +50,9 @@ impl Database {
 					paper_id,
 					title,
 					abstract,
-					body
+					body,
+					abstract_embedding,
+					body_embedding
 				FROM
 					papers
 				WHERE
@@ -80,16 +79,15 @@ impl Database {
 		let col_title: String = row.try_get("title")?;
 		let col_abstract: String = row.try_get("abstract")?;
 		let col_body: String = row.try_get("body")?;
-		let col_abstract_embedding: Vec<f32> = row.try_get("abstract_embedding")?;
-		let col_body_embedding: Vec<f32> = row.try_get("body_embedding")?;
+		// let col_abstract_embedding: Vec<f32> = row.try_get("abstract_embedding")?;
 
 		Ok(Document {
 			paper_id: col_paper_id,
 			title: Some(col_title),
 			abstract_text: Some(col_abstract),
 			body_text: Some(col_body),
-			abstract_embedding: Some(PgVec(col_abstract_embedding)),
-			body_embedding: Some(PgVec(col_body_embedding)),
+			// abstract_embedding: Some(PgVec(col_abstract_embedding))
+			abstract_embedding: None
 		})
 	}
 
@@ -98,28 +96,25 @@ impl Database {
 		embedding: PgVec,
 		limit: Option<u32>,
 	) -> Vec<Document> {
-		let query_template = r#"
+		let query_template = format!(
+			r#"
 			SELECT
 				DISTINCT paper_id,
-				$1 <=> abstract_embedding AS similarity,
+				{0} <=> abstract_embedding AS similarity,
 				title,
 				abstract,
 				body
 			FROM
 				papers
-			ORDER BY similarity ASC LIMIT $2;
-		"#;
+			ORDER BY similarity ASC LIMIT {1};
+		"#,
+			embedding.to_string(),
+			limit.unwrap_or(20).to_string()
+		);
 
 		// println!("{:#?}", query_template);
 
-		let rows = self
-			.client
-			.query(
-				query_template,
-				&[&embedding.to_string(), &limit.unwrap_or(20).to_string()],
-			)
-			.await
-			.unwrap();
+		let rows = self.client.query(&query_template, &[]).await.unwrap();
 		rows.iter()
 			.filter_map(|row| self.get_document_from_row(row).ok())
 			.collect::<Vec<Document>>()
@@ -147,57 +142,42 @@ impl Database {
 	}
 
 	pub async fn insert_document(
-		&mut self,
-		document: &Document,
+		&self,
+		document: Document,
 	) -> Result<(), Box<dyn std::error::Error>> {
-		// let query_template = format!(
-		// 	r#"
-		// 	INSERT INTO papers
-		// 		(paper_id, title, abstract, body, abstract_embedding, body_embedding)
-		// 	VALUES
-		// 		('{0:}', '{1:}', '{2:}', '{3:}', {4:}, {5:})
-		// 	ON CONFLICT ON CONSTRAINT papers_pkey DO UPDATE SET
-		// 		title = '{1:}',
-		// 		abstract = '{2:}',
-		// 		body = '{3:}',
-		// 		abstract_embedding = {4:},
-		// 		body_embedding = {5:}
-		// "#,
-		// );
-		let query_template = r#"
+		let paper_id: String = document.paper_id;
+		let title: String = document.title.unwrap_or(String::from("?TITLE?"));
+		let abstract_text: String = document.abstract_text.unwrap_or(String::from("?ABSTRACT?"));
+		let body_text: String = document.body_text.unwrap_or(String::from("?BODY?"));
+		let abstract_embedding: PgVec = document.abstract_embedding.unwrap_or(PgVec(vec![]));
+
+		let query_template = format!(r#"
 			INSERT INTO papers
-				(paper_id, title, abstract, body, abstract_embedding, body_embedding)
+				(paper_id, title, abstract, body, abstract_embedding)
 			VALUES
-				($1, $2, $3, $4, $5, $6)
+				($1, $2, $3, $4, {0})
 			ON CONFLICT ON CONSTRAINT papers_pkey DO UPDATE SET
 				title = $2,
 				abstract = $3,
 				body = $4,
-				abstract_embedding = $5,
-				body_embedding = $6
-		"#;
+				abstract_embedding = {0}
+		;"#,
+			abstract_embedding
+		);
 
 		// println!("{}", &document.title.clone().unwrap_or(String::from("")));
-		println!("{}", query_template);
+		// println!("{}", query_template);
+
+		println!("{:#?}", paper_id);
 
 		self.client
 			.query(
-				query_template,
-				&[
-					&document.paper_id.to_string(),
-					&document.title.clone().unwrap_or(String::from("?TITLE?")),
-					&document
-						.abstract_text
-						.clone()
-						.unwrap_or(String::from("?ABSTRACT?")),
-					&document.body_text.clone().unwrap_or(String::from("?BODY?")),
-					&document.abstract_embedding.as_ref().unwrap(),
-					&document.body_embedding.as_ref().unwrap(),
-				],
+				&query_template.to_string(),
+				&[&paper_id, &title, &abstract_text, &body_text],
 			)
-			.await?;
+			.await.unwrap();
 
-		println!("{:#?}", document);
+		println!("{:#?}", title);
 
 		Ok(())
 	}
@@ -208,8 +188,7 @@ pub struct Document {
 	pub title: Option<String>,
 	pub abstract_text: Option<String>,
 	pub body_text: Option<String>,
-	pub abstract_embedding: Option<PgVec>,
-	pub body_embedding: Option<PgVec>,
+	pub abstract_embedding: Option<PgVec>
 }
 
 impl std::fmt::Debug for Document {

@@ -35,17 +35,21 @@ async fn main() {
 
 	// println!("{:#?}", docs);
 
-	let mut sentence_transformer = transformer::Embedder::new(&database);
+	let mut sentence_transformer = transformer::Embedder::new(&database.clone());
 	let sentence_transformer = Arc::new(Mutex::new(sentence_transformer));
 
-	// let sem_docs =
-	// 	sentence_transformer.semantic_query("what are the effects of coronavirus or covid on pregnant women?");
+	let x = sentence_transformer.clone();
+	let sem_docs =
+		x.lock().await
+		.semantic_query("which socioeconomical impacts does the coronavírus have on under developed countries").await;
 
-	// println!("{:#?}", sem_docs);
+	drop(x);
 
-	let mut indexer = indexer::Indexer::new(&database, &sentence_transformer);
+	println!("{:#?}", sem_docs);
 
-	indexer.insert_papers_from_csv("/home/jedi/git-repos/CovidMap/data/small/df_covid_preprocessed.csv").await.unwrap();
+	// let mut indexer = indexer::Indexer::new(&database.clone(), &sentence_transformer.clone());
+
+	// indexer.insert_papers_from_csv("/home/jedi/git-repos/CovidMap/data/full/df_covid_preprocessed.csv").await.unwrap();
 
 
 }
