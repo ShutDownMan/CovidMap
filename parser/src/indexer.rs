@@ -64,7 +64,6 @@ impl Indexer {
 					// insert document into database
 					db_lock.insert_document(document).await.unwrap();
 					drop(db_lock);
-			
 				}));
 			}
 		}
