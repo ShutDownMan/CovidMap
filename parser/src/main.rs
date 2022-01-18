@@ -15,8 +15,6 @@ use tokio::sync::Mutex;
 async fn main() {
 	dotenv::dotenv().expect("Failed to read .env file");
 
-	dotenv::dotenv().expect("Failed to read .env file");
-
 	let ast = search::query::parse(
 		r#" ("pregnant" OR pregnancy OR maternity) (covid OR Sars-Cov-2) (effects OR disease) "#,
 	)
@@ -30,6 +28,8 @@ async fn main() {
 	let x = database.clone();
 	let docs = x.lock().await.match_query(pg_query).await;
 	drop(x);
+
+	println!("{:#?}", docs);
 }
 
 /*

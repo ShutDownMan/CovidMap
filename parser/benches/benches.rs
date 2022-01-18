@@ -27,25 +27,25 @@ fn test_query_ast(b: &mut Bencher) {
     });
 }
 
-#[bench]
-fn test_match_query(b: &mut Bencher) {
+#[async_std::bench]
+async fn test_match_query(b: &mut Bencher) {
     dotenv::dotenv().expect("Failed to read .env file");
 
-    b.iter(|| {
-        let ast = search::query::parse(
-            r#" ("pregnant" OR pregnancy OR maternity) (covid OR Sars-Cov-2) (effects OR disease) "#,
-        )
-        .unwrap();
-    
-        Runtime::new().unwrap().block_on(async {
-                let pg_query = search::ast_to_query(&ast);
-                let mut database = database::Database::new().await.unwrap();
-                let database = Arc::new(Mutex::new(database));
+    let ast = search::query::parse(
+        r#" ("pregnant" OR pregnancy OR maternity) (covid OR Sars-Cov-2) (effects OR disease) "#,
+    )
+    .unwrap();
 
-                let x = database.clone();
-                let docs = x.lock().await.match_query(pg_query).await;
-                drop(x);
-            });
+    let pg_query = search::ast_to_query(&ast);
+
+    let mut database = database::Database::new().await.unwrap();
+    let database = Arc::new(Mutex::new(database));
+
+    let x = database.clone();
+    let docs = x.lock().await.match_query(pg_query).await;
+
+    b.iter(|| {
+
     });
 }
 

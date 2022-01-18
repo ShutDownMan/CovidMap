@@ -16,6 +16,7 @@ regex = "1.5.4"
 sbert = { git = "https://github.com/cpcdoy/rust-sbert/", branch = "character_bert" }
 tokio = { version = "1.15.0", features = ["full"] }
 tokio-postgres = "0.7.5"
+async-attributes = "1.1.2"
 
 [features]
 
