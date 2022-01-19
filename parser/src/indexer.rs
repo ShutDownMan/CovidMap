@@ -8,15 +8,15 @@ use tokio::sync::Mutex;
 use futures::future::join_all;
 
 pub struct Indexer {
-	database: Arc<Mutex<Database>>,
+	database: Arc<Database>,
 	embedder: Arc<Mutex<Embedder>>,
 }
 
 impl Indexer {
-	pub fn new(database: &Arc<Mutex<Database>>, embedder: &Arc<Mutex<Embedder>>) -> Indexer {
+	pub fn new(database: Arc<Database>, embedder: Arc<Mutex<Embedder>>) -> Indexer {
 		Indexer {
-			database: database.clone(),
-			embedder: embedder.clone(),
+			database: database,
+			embedder: embedder,
 		}
 	}
 
@@ -35,20 +35,19 @@ impl Indexer {
 				let abstract_text: Option<String> = Some(paper[2].to_string());
 				let body_text: Option<String> = Some(paper[3].to_string());
 
-				let db = Arc::clone(&self.database);
-				let embedder = Arc::clone(&self.embedder);
+				let db = self.database.clone();
+				let embedder = self.embedder.clone();
 
 				t_papers.push(tokio::spawn(async move {
-
-					// get hold of the embedder
-					let embedder_lock = embedder.lock().await;
-
-					// get embeddings for abstract and body
-					let abstract_embedding =
-						Some(embedder_lock.embed_sentence(&abstract_text.clone().unwrap()));
-
-					// drop embedder as it can be used by the other threads
-					drop(embedder_lock);
+					let abstract_embedding = {
+						// get embeddings for abstract and body
+						Some(
+							embedder
+								.lock()
+								.await
+								.embed_sentence(&abstract_text.clone().unwrap()),
+						)
+					};
 
 					// create document struct
 					let document = Document {
@@ -56,14 +55,11 @@ impl Indexer {
 						title,
 						abstract_text,
 						body_text,
-						abstract_embedding
+						abstract_embedding,
 					};
-					// get a hold of the database
-					let db_lock = db.lock().await;
 
 					// insert document into database
-					db_lock.insert_document(document).await.unwrap();
-					drop(db_lock);
+					db.insert_document(document).await.unwrap();
 				}));
 			}
 		}

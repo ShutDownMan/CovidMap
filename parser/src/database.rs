@@ -18,6 +18,7 @@ impl std::fmt::Debug for Database {
 		write!(f, "{:#?}", self.client)
 	}
 }
+
 impl Database {
 	pub async fn new() -> Result<Database, Error> {
 		let connection_string = format!(
@@ -40,7 +41,7 @@ impl Database {
 		Ok(Database { client: client })
 	}
 
-	pub async fn match_query(&mut self, ts_match: String) -> Vec<Document> {
+	pub async fn match_query(&self, ts_match: String) -> Vec<Document> {
 		let limit: Option<u32> = Some(20);
 
 		let query_template = format!(

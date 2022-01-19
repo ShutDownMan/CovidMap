@@ -27,8 +27,8 @@ fn test_query_ast(b: &mut Bencher) {
     });
 }
 
-#[async_std::bench]
-async fn test_match_query(b: &mut Bencher) {
+#[test]
+fn test_match_query() {
     dotenv::dotenv().expect("Failed to read .env file");
 
     let ast = search::query::parse(
@@ -43,10 +43,6 @@ async fn test_match_query(b: &mut Bencher) {
 
     let x = database.clone();
     let docs = x.lock().await.match_query(pg_query).await;
-
-    b.iter(|| {
-
-    });
 }
 
 #[tokio::test]

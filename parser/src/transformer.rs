@@ -17,27 +17,26 @@ use tokio::sync::Mutex;
 
 pub struct Embedder {
 	model: SBertRT,
-	database: Arc<Mutex<Database>>,
+	database: Arc<Database>,
 }
 
 impl Embedder {
 	/// create a sentence embedder instance
-	pub fn new(database: &Arc<Mutex<Database>>) -> Embedder {
+	pub fn new(database: Arc<Database>) -> Embedder {
 		let mut home: PathBuf = env::current_dir().unwrap();
 		home.push(env::var("PRETRAINED_MODEL_PATH").unwrap());
 
 		let sbert_model = SBertRT::new(home).unwrap();
 
-		Embedder { model: sbert_model, database: database.clone() }
+		Embedder { model: sbert_model, database: database }
 	}
 
-	pub async fn semantic_query(&mut self, query_text: &str) -> Vec<Document> {
+	pub async fn semantic_query(&self, query_text: &str) -> Vec<Document> {
 		let query_embedding = self.embed_sentence(query_text);
 
 		// println!("{:#?}", query_embedding);
 
-		let db = self.database.lock().await;
-		db.find_similar_documents_by_embedding(query_embedding, None).await
+		self.database.find_similar_documents_by_embedding(query_embedding, None).await
 	}
 
 	pub fn embed_sentence(&self, text: &str) -> PgVec {

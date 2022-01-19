@@ -1,6 +1,6 @@
 
 mod database;
-mod indexer;
+//mod indexer;
 mod search;
 mod transformer;
 mod utils;
@@ -9,7 +9,6 @@ use dotenv;
 use tokio;
 
 use std::sync::Arc;
-use tokio::sync::Mutex;
 
 #[tokio::main]
 async fn main() {
@@ -20,14 +19,18 @@ async fn main() {
 	)
 	.unwrap();
 
-	let pg_query = search::ast_to_query(&ast);
+	let pg_query = search::ast_to_query(& ast);
 
 	let mut database = database::Database::new().await.unwrap();
-	let database = Arc::new(Mutex::new(database));
+	let db = Arc::new(database);
 
-	let x = database.clone();
-	let docs = x.lock().await.match_query(pg_query).await;
-	drop(x);
+	// let docs = db.match_query(pg_query).await;
+
+	// println!("{:#?}", docs);
+
+	let mut embedder = transformer::Embedder::new(db.clone());
+
+	let docs = (& embedder).semantic_query("what are the effects of coronavirus or covid on pregnant women?").await;
 
 	println!("{:#?}", docs);
 }
