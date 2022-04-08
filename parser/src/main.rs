@@ -4,7 +4,8 @@ mod search;
 mod transformer;
 mod utils;
 
-use database::Database;
+use database::{Database, Json};
+use json::{object, array, JsonValue};
 use transformer::transformer::{Embedder, EmbedderHandle};
 
 use dotenv;
@@ -156,16 +157,13 @@ async fn router(
 			// println!("{:#?}", docs);
 			// println!("=================================");
 
-			let docs_str = docs.iter()
-				.map(|doc| doc.to_string())
-				.collect::<Vec<String>>()
-				.join("\n");
+			let docs_json = object!{
+				search_results: docs.iter()
+					.map(|doc| doc.to_json())
+					.collect::<Vec<json::JsonValue>>()
+			};
 
-			// let docs_json = docs.iter()
-			// 	.map(|doc| doc.to_json())
-			// 	.collect();
-
-			Ok(Response::new(Body::from(docs_str)))
+			Ok(Response::new(Body::from(docs_json.to_string())))
 		}
 
 		// Return the 404 Not Found for other routes.

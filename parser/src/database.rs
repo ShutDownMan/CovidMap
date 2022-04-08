@@ -251,7 +251,7 @@ impl Json for Document {
 			paper_id: m_paper_id,
 			title: m_title,
 			abstract_text: m_abstract_text,
-			body_text: m_body_text
+			// body_text: m_body_text
 		}
 	}
 }
