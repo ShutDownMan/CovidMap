@@ -4,10 +4,13 @@
 // #![allow(dead_code)]
 
 use tokio_postgres::{Client, Error, NoTls};
+use futures::future;
 
 use std::env;
+use json::{object, array, JsonValue};
 
 use crate::utils::PgVec;
+
 
 pub struct Database {
 	pub client: Client,
@@ -88,14 +91,14 @@ impl Database {
 			abstract_text: Some(col_abstract),
 			body_text: Some(col_body),
 			// abstract_embedding: Some(PgVec(col_abstract_embedding))
-			abstract_embedding: None
+			abstract_embedding: None,
 		})
 	}
 
-	pub async fn find_similar_documents_by_embedding(
+	pub async fn get_papers_by_embedding(
 		&self,
 		embedding: PgVec,
-		limit: Option<u32>,
+		limit: Option<usize>,
 	) -> Vec<Document> {
 		let query_template = format!(
 			r#"
@@ -121,7 +124,7 @@ impl Database {
 			.collect::<Vec<Document>>()
 	}
 
-	pub async fn _get_paper_by_id(&mut self, paper_id: &str) -> Option<Document> {
+	pub async fn get_paper_by_id(&self, paper_id: &str) -> Option<Document> {
 		let query_template = format!(
 			r#"
 			SELECT
@@ -142,6 +145,18 @@ impl Database {
 		self.get_document_from_row(rows.first()?).ok()
 	}
 
+	pub async fn get_papers_by_ids(&self, paper_ids: Vec<&str>) -> Vec<Document> {
+		let tasks: Vec<_> = paper_ids
+			.iter()
+			.map(|paper_id| self.get_paper_by_id(paper_id))
+			.collect();
+		
+		future::join_all(tasks).await
+			.into_iter()
+			.filter_map(|x| x)
+			.collect()
+	}
+
 	pub async fn insert_document(
 		&self,
 		document: Document,
@@ -152,7 +167,8 @@ impl Database {
 		let body_text: String = document.body_text.unwrap_or(String::from("?BODY?"));
 		let abstract_embedding: PgVec = document.abstract_embedding.unwrap_or(PgVec(vec![]));
 
-		let query_template = format!(r#"
+		let query_template = format!(
+			r#"
 			INSERT INTO papers
 				(paper_id, title, abstract, body, abstract_embedding)
 			VALUES
@@ -176,12 +192,38 @@ impl Database {
 				&query_template.to_string(),
 				&[&paper_id, &title, &abstract_text, &body_text],
 			)
-			.await.unwrap();
+			.await
+			.unwrap();
 
 		println!("{:#?}", title);
 
 		Ok(())
 	}
+
+	pub async fn get_all_embeddings(&self) -> Vec<(String, f64)> {
+		let query_template = format!(
+			r#"
+			SELECT
+				paper_id,
+				abstract_embedding
+			FROM
+				papers
+			;
+		"#
+		);
+
+		// println!("{:#?}", paper_id);
+
+		let rows = self.client.query(&query_template, &[]).await.ok().unwrap();
+
+		rows.iter()
+			.map(|row| (row.get("paper_id"), row.get("abstract_embedding")))
+			.collect()
+	}
+}
+
+pub trait Json {
+    fn to_json(&self) -> json::JsonValue;
 }
 
 pub struct Document {
@@ -189,10 +231,56 @@ pub struct Document {
 	pub title: Option<String>,
 	pub abstract_text: Option<String>,
 	pub body_text: Option<String>,
-	pub abstract_embedding: Option<PgVec>
+	pub abstract_embedding: Option<PgVec>,
+}
+
+impl Json for Document {
+	fn to_json(&self) -> json::JsonValue {
+		let m_paper_id = self.paper_id.clone();
+		let m_title = self.title.clone().unwrap_or("?TITLE?".to_owned());
+		let m_abstract_text = self
+			.abstract_text
+			.clone()
+			.unwrap_or("?ABSTRACT?".to_owned());
+		let m_body_text = self
+			.body_text
+			.clone()
+			.unwrap_or("?BODY?".to_owned());
+
+		object!{
+			paper_id: m_paper_id,
+			title: m_title,
+			abstract_text: m_abstract_text,
+			body_text: m_body_text
+		}
+	}
 }
 
 impl std::fmt::Debug for Document {
+	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+		let m_paper_id = self.paper_id.clone();
+		let m_title = self.title.clone().unwrap_or("?TITLE?".to_owned());
+		let m_abstract_text = self
+			.abstract_text
+			.clone()
+			.unwrap_or("?ABSTRACT?".to_owned());
+		let end = m_abstract_text
+			.chars()
+			.map(|c| c.len_utf8())
+			.take(150)
+			.sum();
+
+		write!(
+			f,
+			"{{[{}] '{}': {}...}}",
+			&m_paper_id,
+			&m_title,
+			&m_abstract_text[..end]
+		)
+	}
+}
+
+impl std::fmt::Display for Document {
 	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
 		let m_paper_id = self.paper_id.clone();
 		let m_title = self.title.clone().unwrap_or("?TITLE?".to_owned());
@@ -230,3 +318,14 @@ impl std::fmt::Debug for Paragraph {
 		write!(f, "{{[{}]: {}}}", &m_paper_id, &m_text[..end])
 	}
 }
+
+impl std::fmt::Display for Paragraph {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+		let m_paper_id = self.paper_id.clone();
+		let m_text = self.text.clone();
+		let end = m_text.chars().map(|c| c.len_utf8()).take(150).sum();
+
+		write!(f, "{{[{}]: {}}}", &m_paper_id, &m_text[..end])
+	}
+}
+

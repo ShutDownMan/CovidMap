@@ -1,6 +1,5 @@
 use crate::database::{Database, Document};
-use crate::transformer::Embedder;
-use crate::utils::PgVec;
+use crate::transformer::transformer::Embedder;
 
 use std::sync::Arc;
 use tokio::sync::Mutex;

@@ -1,5 +1,4 @@
-use json::JsonValue;
-use json::object;
+use json::{object, JsonValue};
 
 peg::parser!{
     /// search query grammar to ast parser
