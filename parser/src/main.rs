@@ -133,8 +133,33 @@ async fn router(
 		(&Method::POST, "/echo") => Ok(Response::new(req.into_body())),
 
 		(&Method::POST, "/search/context") => {
+			let mut response = Response::default();
+
 			let body_bytes = hyper::body::to_bytes(req.into_body()).await?;
 			let body_string = String::from_utf8(body_bytes.to_vec()).unwrap();
+			let body_json = json::parse(&body_string);
+			
+			let search_query = match body_json.ok() {
+				Some(body_json) => {
+					if body_json["search_query"].is_null() {
+						*response.status_mut() = StatusCode::BAD_REQUEST;
+						*response.body_mut() = Body::from(r#"{
+							"error": "Bad search request."
+						}"#);
+						return Ok(response);
+					}
+
+					body_json["search_query"].to_string()
+				}
+				None => {
+					*response.status_mut() = StatusCode::BAD_REQUEST;
+					*response.body_mut() = Body::from(r#"{
+						"error": could not parse request."
+					}"#);
+					return Ok(response);
+				}
+			};
+			println!("{:#?}", search_query);
 
 			// get context lock
 			let ctx = context.inner.clone();
@@ -145,25 +170,20 @@ async fn router(
 					// get context lock
 					let ctx_lock = ctx.lock().await;
 					// context search body string
-					ctx_lock.semantic_query(&body_string).await
+					ctx_lock.semantic_query(&search_query).await
 				})
 			}).await.unwrap();
 
-			// let docs = context.with_lock(|ctx| async {
-			// 	ctx.semantic_query(&body_string).await
-			// }).await;
-
-			// println!("=================================");
-			// println!("{:#?}", docs);
-			// println!("=================================");
-
+			// serialize documents to json objects
 			let docs_json = object!{
 				search_results: docs.iter()
 					.map(|doc| doc.to_json())
 					.collect::<Vec<json::JsonValue>>()
 			};
 
-			Ok(Response::new(Body::from(docs_json.to_string())))
+			*response.body_mut() = Body::from(docs_json.to_string());
+			// return serialized documents as a json string
+			Ok(response)
 		}
 
 		// Return the 404 Not Found for other routes.
