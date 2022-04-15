@@ -30,8 +30,6 @@ pub mod transformer {
 			let mut home: PathBuf = env::current_dir().unwrap();
 			home.push(env::var("PRETRAINED_MODEL_PATH").unwrap());
 
-			println!("{:#?}", home);
-
 			let sbert_model = SBertRT::new(home).unwrap();
 
 			Embedder {

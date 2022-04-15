@@ -91,7 +91,7 @@ async fn startup_server(
 			Ok::<_, hyper::Error>(service_fn(move |req| {
 				let context = context.clone();
 				async move {
-					println!("Got request");
+					println!("Got {} request to {}", req.method(), req.uri().path());
 					Ok::<_, Infallible>(match router(req, context.clone()).await {
 						Ok(rsp) => {
 							println!("Sending success response");
@@ -118,12 +118,23 @@ async fn startup_server(
 use futures::executor;
 use tokio::runtime::Runtime; // 0.3.5
 
+
 /// This is our service handler. It receives a Request, routes on its
 /// path, and returns a Future of a Response.
 async fn router(
 	req: Request<Body>,
 	context: EmbedderHandle,
-) -> Result<Response<Body>, hyper::Error> {
+) -> Result<Response<Body>, hyper::http::Error> {
+	if req.method() == &Method::OPTIONS {
+		println!("Sending OPTIONS headers");
+		return Ok(Response::builder()
+			.status(StatusCode::OK)
+			.header("Access-Control-Allow-Origin", "*")
+			.header("Access-Control-Allow-Headers", "*")
+			.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+			.body(Body::default())?)
+	}
+
 	match (req.method(), req.uri().path()) {
 		// Serve some instructions at /
 		(&Method::GET, "/") => Ok(Response::new(Body::from(
@@ -133,30 +144,32 @@ async fn router(
 		(&Method::POST, "/echo") => Ok(Response::new(req.into_body())),
 
 		(&Method::POST, "/search/context") => {
-			let mut response = Response::default();
-
-			let body_bytes = hyper::body::to_bytes(req.into_body()).await?;
+			let body_bytes = hyper::body::to_bytes(req.into_body()).await.unwrap();
 			let body_string = String::from_utf8(body_bytes.to_vec()).unwrap();
 			let body_json = json::parse(&body_string);
 			
 			let search_query = match body_json.ok() {
 				Some(body_json) => {
 					if body_json["search_query"].is_null() {
-						*response.status_mut() = StatusCode::BAD_REQUEST;
-						*response.body_mut() = Body::from(r#"{
-							"error": "Bad search request."
-						}"#);
-						return Ok(response);
+						println!("Sending BAD_REQUEST");
+						return Response::builder()
+							.status(StatusCode::BAD_REQUEST)
+							.header("Access-Control-Allow-Origin", "*")
+							.body(Body::from(r#"{
+								"error": "Bad search request."
+							}"#));
 					}
 
 					body_json["search_query"].to_string()
 				}
 				None => {
-					*response.status_mut() = StatusCode::BAD_REQUEST;
-					*response.body_mut() = Body::from(r#"{
-						"error": could not parse request."
-					}"#);
-					return Ok(response);
+					println!("Sending BAD_REQUEST");
+					return Response::builder()
+						.status(StatusCode::BAD_REQUEST)
+						.header("Access-Control-Allow-Origin", "*")
+						.body(Body::from(r#"{
+							"error": could not parse request."
+						}"#));
 				}
 			};
 			println!("{:#?}", search_query);
@@ -181,13 +194,19 @@ async fn router(
 					.collect::<Vec<json::JsonValue>>()
 			};
 
-			*response.body_mut() = Body::from(docs_json.to_string());
+			println!("Sending OK");
+			let response = Response::builder()
+				.status(StatusCode::OK)
+				.header("Access-Control-Allow-Origin", "*")
+				.body(Body::from(docs_json.to_string()))?;
+
 			// return serialized documents as a json string
 			Ok(response)
 		}
 
 		// Return the 404 Not Found for other routes.
 		_ => {
+			println!("Sending NOT_FOUND");
 			let mut not_found = Response::default();
 			*not_found.status_mut() = StatusCode::NOT_FOUND;
 			Ok(not_found)
@@ -197,14 +216,7 @@ async fn router(
 
 /*
 
-"what are the effects of coronavirus or covid on pregnant women?"
-"what are the coronavirus side effects and tribulations"
-"what are the long term effects of corona virus disease Sars-Cov-2"
-"how can the coronavirus mutations occour"
-"which socioeconomical impacts does the coronavírus have on underdeveloped countries"
-"what are the effective medication and safety approaches to coronavírus disease"
-"political view on the corona virus pandemic"
-"the aftermath of the pandemic"
+""
 
 // let ast = search::parse(" test OR from:place OR ( sub-query OR \"exactly\" )");
 
