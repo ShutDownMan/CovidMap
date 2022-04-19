@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    .navbar-a {
+        @apply block py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 sm:hover:bg-transparent sm:border-0 sm:hover:text-cyan-400 sm:p-0 dark:text-gray-400 sm:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white sm:dark:hover:bg-transparent dark:border-gray-700;
+    }
+    .navbar-a-active {
+        @apply block py-2 pr-4 pl-3 text-white bg-cyan-400 rounded sm:bg-transparent sm:text-cyan-400 sm:p-0 dark:text-white ;
+    }
+
+}
