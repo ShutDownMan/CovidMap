@@ -5,7 +5,7 @@
     "dev": "svelte-kit --port 5000 dev",
     "build": "svelte-kit build",
     "package": "svelte-kit package",
-    "preview": "svelte-kit preview",
+    "preview": "sudo svelte-kit --port 80 preview",
     "prepare": "svelte-kit sync",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
