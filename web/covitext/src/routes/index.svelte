@@ -32,7 +32,7 @@
 		// console.log('Searching');
 		// console.log(e);
 
-		let fetchedDocs = await fetch('http://127.0.0.1:3000/search/context', {
+		let fetchedDocs = await fetch(`${process.env.COVITEXT_API}/search/context`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
