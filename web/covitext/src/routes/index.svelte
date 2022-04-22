@@ -9,21 +9,21 @@
 	};
 
 	let defaultSearches = [
-		"what are the effects of coronavirus or covid on pregnant women?",
-		"When is the salivary viral load highest for COVID-19?",
-		"what are the coronavirus side effects and tribulations?",
-		"what are the long term effects of corona virus disease Sars-Cov-2?",
-		"how can the coronavirus mutations occour?",
-		"which socioeconomical impacts does the coronavírus have on underdeveloped countries?",
-		"what are the effective medication and safety approaches to coronavírus disease?",
-		"What is the political landscape of the coronavirus pandemic?",
-		"what is the aftermath of the pandemic?",
-		"Is convalescent plasma therapy a precursor to vaccine?",
-		"",
+		'what are the effects of coronavirus or covid on pregnant women?',
+		'When is the salivary viral load highest for COVID-19?',
+		'what are the coronavirus side effects and tribulations?',
+		'what are the long term effects of corona virus disease Sars-Cov-2?',
+		'how can the coronavirus mutations occour?',
+		'which socioeconomical impacts does the coronavírus have on underdeveloped countries?',
+		'what are the effective medication and safety approaches to coronavírus disease?',
+		'What is the political landscape of the coronavirus pandemic?',
+		'what is the aftermath of the pandemic?',
+		'Is convalescent plasma therapy a precursor to vaccine?',
+		''
 	];
 
 	let searchDocs = {
-		searchQuery: defaultSearches[Math.floor(Math.random()*defaultSearches.length)],
+		searchQuery: defaultSearches[Math.floor(Math.random() * defaultSearches.length)],
 		limit: 20,
 		docs: []
 	};
@@ -32,14 +32,14 @@
 		// console.log('Searching');
 		// console.log(e);
 
-		let fetchedDocs = await fetch(`${process.env.COVITEXT_API}/search/context`, {
+		let fetchedDocs = await fetch(`http://192.168.1.220:3000/search/context`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({
 				search_query: searchDocs.searchQuery,
-				limit: 10,
+				limit: 10
 			})
 		}).then((response) => response.json());
 
@@ -109,7 +109,9 @@
 			showModal = false;
 		}}
 	>
-		<svelte:fragment slot="body"><p class="font-mono text-sm">{modalDoc.abstract_text}</p></svelte:fragment>
+		<svelte:fragment slot="body"
+			><p class="font-mono text-sm">{modalDoc.abstract_text}</p></svelte:fragment
+		>
 	</DOCUMENT_MODAL>
 {/if}
 
