@@ -34,7 +34,6 @@
   "type": "module",
   "dependencies": {
     "@sveltejs/adapter-node": "^1.0.0-next.73",
-    "@sveltejs/adapter-static": "^1.0.0-next.29",
     "svelte2tsx": "^0.5.9",
     "typescript": "^4.6.3"
   }
