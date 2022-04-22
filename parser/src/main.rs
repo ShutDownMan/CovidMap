@@ -80,7 +80,7 @@ async fn main() {
 async fn startup_server(
 	context: EmbedderHandle,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-	let addr = ([127, 0, 0, 1], 3000).into();
+	let addr = ([127, 0, 0, 1], 6552).into();
 
 	let context = context.clone();
 
@@ -138,7 +138,7 @@ async fn router(
 	match (req.method(), req.uri().path()) {
 		// Serve some instructions at /
 		(&Method::GET, "/") => Ok(Response::new(Body::from(
-			"Try POSTing data to /echo such as: `curl localhost:3000/search/context -XPOST -d 'hello world'`",
+			"Try POSTing data to /echo such as: `curl localhost:6552/search/context -XPOST -d 'hello world'`",
 		))),
 
 		(&Method::POST, "/echo") => Ok(Response::new(req.into_body())),

@@ -2,10 +2,10 @@
   "name": "covitext",
   "version": "0.0.1",
   "scripts": {
-    "dev": "svelte-kit --port 5000 dev",
+    "dev": "svelte-kit --port 6553 dev",
     "build": "svelte-kit build",
     "package": "svelte-kit package",
-    "preview": "sudo svelte-kit --port 80 preview",
+    "preview": "sudo svelte-kit --port 6553 preview",
     "prepare": "svelte-kit sync",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
