@@ -36,38 +36,8 @@ async fn main() {
 	let mut database = Database::new().await.unwrap();
 	let db = Arc::new(database);
 
-	// let docs = db.match_query(pg_query).await;
-
-	// println!("{:#?}", docs);
-
 	let mut embedder = Embedder::new(db.clone());
 	let h_embedder = EmbedderHandle::new(embedder);
-
-	// let docs = embedder_ts
-	// 	.lock()
-	// 	.await
-	// 	.semantic_query("what are the effects of coronavirus or covid on pregnant women?")
-	// 	.await;
-
-	// loop {
-	// 	use std::time::Instant;
-	// 	let mut query_text = String::new();
-
-	// 	io::stdin()
-	// 		.read_line(&mut query_text)
-	// 		.expect("failed to readline");
-
-	// 	let now = Instant::now();
-	// 	{
-	// 		let docs = (&embedder).semantic_query(&query_text.to_string()).await;
-
-	// 		println!("=================================");
-	// 		println!("{:#?}", docs);
-	// 		println!("=================================");
-	// 	}
-	// 	let elapsed = now.elapsed();
-	// 	println!("Elapsed: {:.2?}", elapsed);
-	// }
 
 	match startup_server(h_embedder.clone()).await {
 		Ok(_) => {}
@@ -80,7 +50,7 @@ async fn main() {
 async fn startup_server(
 	context: EmbedderHandle,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-	let addr = ([127, 0, 0, 1], 6552).into();
+	let addr = ([127, 0, 0, 1], 6553).into();
 
 	let context = context.clone();
 
@@ -138,7 +108,7 @@ async fn router(
 	match (req.method(), req.uri().path()) {
 		// Serve some instructions at /
 		(&Method::GET, "/") => Ok(Response::new(Body::from(
-			"Try POSTing data to /echo such as: `curl localhost:6552/search/context -XPOST -d 'hello world'`",
+			"Try POSTing data to /echo such as: `curl localhost:6553/search/context -XPOST -d 'hello world'`",
 		))),
 
 		(&Method::POST, "/echo") => Ok(Response::new(req.into_body())),
