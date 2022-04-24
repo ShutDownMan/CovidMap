@@ -27,3 +27,7 @@ impl fmt::Debug for PgVec {
         )
     }
 }
+
+// impl std::convert::From<PgVec> for &[f32] {
+
+// }
