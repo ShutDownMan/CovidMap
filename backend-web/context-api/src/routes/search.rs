@@ -9,20 +9,18 @@ use crate::embedder::Embedder;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SearchQuery {
     pub search_query: String,
-    pub limit: Int,
+    pub limit: i32,
 }
 
 #[post("/search/context", format="json", data="<search_data>")]
 pub async fn search_handler(conn: &State<Pool<Postgres>>, embedder: &State<Embedder>, search_data: Json<SearchQuery>) -> Value {
-    let search_result = services::search::search_context(conn, embedder, search_data).await;
-
-    match search_result {
-        Ok(_) => {
-            search_result
+    match services::search::search_context(conn, embedder, search_data).await {
+        Ok(search_result) => {
+            json![search_result]
         },
-        Err(search_result) => {
+        Err(search_error) => {
             json!({
-                "message": format!("search failed: {}", search_result.to_string()),
+                "message": format!("search failed: {}", search_error.to_string()),
             })
         }
     }
