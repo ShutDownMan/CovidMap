@@ -12,6 +12,7 @@ use anyhow::Result;
 use routes::date::get_current_date;
 use routes::snippet::{snippet_post_handler, snippet_get_handler};
 use routes::search::search_handler;
+use routes::document::get_document_by_paper_id;
 
 // use rocket::State;
 // use rocket::http::Status;
@@ -50,7 +51,14 @@ async fn main() -> Result<()> {
         .manage(embedder)
         .mount(
             "/api",
-            routes![index, get_current_date, snippet_post_handler, snippet_get_handler, search_handler],
+            routes![
+                index,
+                get_current_date,
+                snippet_post_handler,
+                snippet_get_handler,
+                search_handler,
+                get_document_by_paper_id
+            ],
         )
         .ignite().await?
         .launch().await?;
