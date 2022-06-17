@@ -3,6 +3,7 @@ mod database;
 mod search;
 mod transformer;
 mod utils;
+mod indexer;
 
 use database::{Database, Json};
 use json::{object, array, JsonValue};
@@ -22,6 +23,8 @@ use futures::TryStreamExt;
 use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Method, Request, Response, Server, StatusCode};
 
+use indexer::Indexer;
+
 #[tokio::main]
 async fn main() {
 	dotenv::dotenv().expect("Failed to read .env file");
@@ -39,12 +42,16 @@ async fn main() {
 	let mut embedder = Embedder::new(db.clone());
 	let h_embedder = EmbedderHandle::new(embedder);
 
-	match startup_server(h_embedder.clone()).await {
-		Ok(_) => {}
-		Err(e) => {
-			println!("{}", e);
-		}
-	}
+	let indexer = Indexer::new(db, h_embedder);
+
+	// indexer.insert_papers_from_csv("/home/jedi/git-repos/CovidMap/data/metadata.csv").await.unwrap();
+
+	// match startup_server(h_embedder.clone()).await {
+	// 	Ok(_) => {}
+	// 	Err(e) => {
+	// 		println!("{}", e);
+	// 	}
+	// }
 }
 
 async fn startup_server(

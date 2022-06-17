@@ -3,14 +3,14 @@
 // #![allow(unused_mut)]
 // #![allow(dead_code)]
 
-use tokio_postgres::{Client, Error, NoTls};
 use futures::future;
+use tokio_postgres::{Client, Error, NoTls};
 
+use json::{array, object, JsonValue};
 use std::env;
-use json::{object, array, JsonValue};
 
-use crate::utils::PgVec;
-
+// use crate::utils::PgVec;
+use pgvector::Vector;
 
 pub struct Database {
 	pub client: Client,
@@ -89,7 +89,7 @@ impl Database {
 			paper_id: col_paper_id,
 			title: Some(col_title),
 			abstract_text: Some(col_abstract),
-			body_text: Some(col_body),
+			body_text: None,
 			// abstract_embedding: Some(PgVec(col_abstract_embedding))
 			abstract_embedding: None,
 		})
@@ -97,28 +97,30 @@ impl Database {
 
 	pub async fn get_papers_by_embedding(
 		&self,
-		embedding: PgVec,
-		limit: Option<usize>,
+		embedding: pgvector::Vector,
+		limit: Option<u32>,
 	) -> Vec<Document> {
 		let query_template = format!(
 			r#"
 			SELECT
 				DISTINCT paper_id,
-				{0} <=> abstract_embedding AS similarity,
+				$1 <=> abstract_embedding AS similarity,
 				title,
 				abstract,
 				body
 			FROM
 				papers
-			ORDER BY similarity ASC LIMIT {1};
-		"#,
-			embedding.to_string(),
-			limit.unwrap_or(20).to_string()
+			ORDER BY similarity ASC LIMIT $2;
+		"#
 		);
 
 		// println!("{:#?}", query_template);
 
-		let rows = self.client.query(&query_template, &[]).await.unwrap();
+		let rows = self
+			.client
+			.query(&query_template, &[&embedding, &limit.unwrap_or(20)])
+			.await
+			.unwrap();
 		rows.iter()
 			.filter_map(|row| self.get_document_from_row(row).ok())
 			.collect::<Vec<Document>>()
@@ -150,52 +152,105 @@ impl Database {
 			.iter()
 			.map(|paper_id| self.get_paper_by_id(paper_id))
 			.collect();
-		
-		future::join_all(tasks).await
+
+		future::join_all(tasks)
+			.await
 			.into_iter()
 			.filter_map(|x| x)
 			.collect()
 	}
 
-	pub async fn insert_document(
+	pub async fn insert_abstract(
 		&self,
 		document: Document,
 	) -> Result<(), Box<dyn std::error::Error>> {
 		let paper_id: String = document.paper_id;
 		let title: String = document.title.unwrap_or(String::from("?TITLE?"));
 		let abstract_text: String = document.abstract_text.unwrap_or(String::from("?ABSTRACT?"));
-		let body_text: String = document.body_text.unwrap_or(String::from("?BODY?"));
-		let abstract_embedding: PgVec = document.abstract_embedding.unwrap_or(PgVec(vec![]));
+		// let body_text: String = document.body_text.unwrap_or(String::from("?BODY?"));
+		// let title_embedding: Vector = document.title_embedding.unwrap_or(Vector::from(vec![]));
+		let abstract_embedding: Vector =
+			document.abstract_embedding.unwrap_or(Vector::from(vec![]));
+		// let body_embedding: Vector = document.body_embedding.unwrap_or(Vector(vec![]));
 
-		let query_template = format!(
+		// inserting on document table
+		let query_document = format!(
 			r#"
-			INSERT INTO papers
-				(paper_id, title, abstract, body, abstract_embedding)
+			INSERT INTO document
+				(title, pmc_id)
 			VALUES
-				($1, $2, $3, $4, {0})
-			ON CONFLICT ON CONSTRAINT papers_pkey DO UPDATE SET
-				title = $2,
-				abstract = $3,
-				body = $4,
-				abstract_embedding = {0}
-		;"#,
-			abstract_embedding
+				($1, $2)
+			ON CONFLICT ON CONSTRAINT document_pk DO UPDATE SET
+				title = $1,
+				pmc_id = $2
+			RETURNING (id)
+			;"#
 		);
+
+		let insert_result = self
+			.client
+			.query(&query_document, &[&title, &paper_id])
+			.await
+			.unwrap();
+
+		let id_document: i32 = insert_result[0].get("id");
+		println!("ID: {}", id_document);
+		let id_text_type = 1;
+
+		// inserting on document_text table
+		let query_document_text = format!(
+			r#"
+			INSERT INTO document_text
+				(text, id_document, id_text_type)
+			VALUES
+				($1, $2, $3)
+			ON CONFLICT ON CONSTRAINT document_text_pk DO UPDATE SET
+				text = $1,
+				id_document = $2,
+				id_text_type = $3
+			RETURNING (id)
+			;"#
+		);
+
+		let insert_result = self
+			.client
+			.query(
+				&query_document,
+				&[&abstract_text, &id_document, &id_text_type],
+			)
+			.await
+			.unwrap();
+
+		let value = abstract_embedding;
+		let id_model = 1;
+		let id_document_text: i32 = insert_result[0].get("id");
+
+		// inserting on embedding table
+		let query_embedding = format!(
+			r#"
+			INSERT INTO embedding
+				(value, id_model, id_document_text)
+			VALUES
+				($1, $2, $3)
+			ON CONFLICT ON CONSTRAINT embedding_pk DO UPDATE SET
+				value = $1,
+				id_model = $2,
+				id_document_text = $3
+			RETURNING (id)
+			;"#
+		);
+
+		self.client
+			.query(&query_document, &[&value, &id_model, &id_document_text])
+			.await
+			.unwrap();
 
 		// println!("{}", &document.title.clone().unwrap_or(String::from("")));
 		// println!("{}", query_template);
 
 		println!("{:#?}", paper_id);
 
-		self.client
-			.query(
-				&query_template.to_string(),
-				&[&paper_id, &title, &abstract_text, &body_text],
-			)
-			.await
-			.unwrap();
-
-		println!("{:#?}", title);
+		// println!("{:#?}", title);
 
 		Ok(())
 	}
@@ -208,8 +263,7 @@ impl Database {
 				abstract_embedding
 			FROM
 				papers
-			;
-		"#
+			;"#
 		);
 
 		// println!("{:#?}", paper_id);
@@ -223,15 +277,15 @@ impl Database {
 }
 
 pub trait Json {
-    fn to_json(&self) -> json::JsonValue;
+	fn to_json(&self) -> json::JsonValue;
 }
 
 pub struct Document {
 	pub paper_id: String,
 	pub title: Option<String>,
 	pub abstract_text: Option<String>,
-	pub body_text: Option<String>,
-	pub abstract_embedding: Option<PgVec>,
+	pub body_text: Option<Vec<String>>,
+	pub abstract_embedding: Option<pgvector::Vector>,
 }
 
 impl Json for Document {
@@ -242,12 +296,9 @@ impl Json for Document {
 			.abstract_text
 			.clone()
 			.unwrap_or("?ABSTRACT?".to_owned());
-		let m_body_text = self
-			.body_text
-			.clone()
-			.unwrap_or("?BODY?".to_owned());
+		let m_body_text = self.body_text.clone().unwrap_or(vec![]);
 
-		object!{
+		object! {
 			paper_id: m_paper_id,
 			title: m_title,
 			abstract_text: m_abstract_text,
@@ -320,7 +371,7 @@ impl std::fmt::Debug for Paragraph {
 }
 
 impl std::fmt::Display for Paragraph {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
 		let m_paper_id = self.paper_id.clone();
 		let m_text = self.text.clone();
 		let end = m_text.chars().map(|c| c.len_utf8()).take(150).sum();
@@ -328,4 +379,3 @@ impl std::fmt::Display for Paragraph {
 		write!(f, "{{[{}]: {}}}", &m_paper_id, &m_text[..end])
 	}
 }
-

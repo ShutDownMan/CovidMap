@@ -1,5 +1,6 @@
 use crate::database::{Database, Document};
 use crate::transformer::transformer::Embedder;
+use crate::transformer::transformer::EmbedderHandle;
 
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -8,11 +9,11 @@ use futures::future::join_all;
 
 pub struct Indexer {
 	database: Arc<Database>,
-	embedder: Arc<Mutex<Embedder>>,
+	embedder: EmbedderHandle,
 }
 
 impl Indexer {
-	pub fn new(database: Arc<Database>, embedder: Arc<Mutex<Embedder>>) -> Indexer {
+	pub fn new(database: Arc<Database>, embedder: EmbedderHandle) -> Indexer {
 		Indexer {
 			database: database,
 			embedder: embedder,
@@ -32,7 +33,7 @@ impl Indexer {
 				let paper_id: String = paper[0].to_string();
 				let title: Option<String> = Some(paper[1].to_string());
 				let abstract_text: Option<String> = Some(paper[2].to_string());
-				let body_text: Option<String> = Some(paper[3].to_string());
+				// let body_text: Option<Vec<String>> = Some(paper[3].to_string());
 
 				let db = self.database.clone();
 				let embedder = self.embedder.clone();
@@ -42,6 +43,7 @@ impl Indexer {
 						// get embeddings for abstract and body
 						Some(
 							embedder
+								.inner
 								.lock()
 								.await
 								.embed_sentence(&abstract_text.clone().unwrap()),
@@ -53,12 +55,12 @@ impl Indexer {
 						paper_id,
 						title,
 						abstract_text,
-						body_text,
+						body_text: None,
 						abstract_embedding,
 					};
 
 					// insert document into database
-					db.insert_document(document).await.unwrap();
+					db.insert_abstract(document).await.unwrap();
 				}));
 			}
 		}

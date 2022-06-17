@@ -32,7 +32,7 @@
 		// console.log('Searching');
 		// console.log(e);
 
-		let fetchedDocs = await fetch(`http://192.168.1.220:6552/search/context`, {
+		let fetchedDocs = await fetch(`http://localhost:8080/api/search/context`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'

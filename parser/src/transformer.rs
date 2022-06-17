@@ -11,7 +11,8 @@ pub mod transformer {
 	use std::path::PathBuf;
 
 	use crate::database::{Database, Document, Paragraph};
-	use crate::utils::PgVec;
+	// use crate::utils::PgVec;
+	use pgvector::Vector;
 
 	use std::sync::Arc;
 	use tokio::sync::Mutex;
@@ -46,8 +47,8 @@ pub mod transformer {
 				.await
 		}
 
-		pub fn embed_sentence(&self, text: &str) -> PgVec {
-			PgVec(self.model.forward(&[text], None).unwrap().remove(0))
+		pub fn embed_sentence(&self, text: &str) -> Vector {
+			Vector::from(self.model.forward(&[text], None).unwrap().remove(0))
 		}
 	}
 
@@ -84,7 +85,9 @@ pub mod transformer {
 					let mut lock = ctx.lock().await;
 					func(&mut *lock)
 				})
-			}).await.unwrap()
+			})
+			.await
+			.unwrap()
 		}
 	}
 }

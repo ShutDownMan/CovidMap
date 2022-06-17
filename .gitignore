@@ -11,7 +11,8 @@ thesis/*/*.synctex.gz
 !thesis/Anteprojeto/abntex2/*
 thesis/Anteprojeto/__latexindent_temp.tex
 notebooks/.env
-parser/target/*
 parser/.env
 notes.md
 temp
+context-venv/
+target/
