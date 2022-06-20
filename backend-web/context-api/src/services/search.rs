@@ -31,20 +31,42 @@ pub async fn search_context(conn: &State<Pool<Postgres>>, embedder: &State<Embed
     let search_embedding_model = EmbeddingModelType::DistilBERT;
     let search_embedding = embedder.embed_snippet(&search_embedding_model, &search.search_query);
 
+    let search_allowed_snippets = match &search.allowed_snippets {
+        Some(allowed_snippets) => allowed_snippets
+            .iter()
+            .map(|snippet_type| String::from(snippet_type))
+            .collect::<Vec<String>>(),
+        None => vec![String::from("title"), String::from("abstract")]
+    };
+    
+    let search_limit = match search.limit {
+        Some(limit) => limit,
+        None => 20
+    };
+
     // create search query
     let search_query_str = r#"
-        SELECT DISTINCT "id_document_text", "id" as "embedding_id", $1 <=> "value" as similarity
+        SELECT
+            DISTINCT "embedding"."id_document_text",
+            "embedding"."id" as "embedding_id",
+            "embedding"."value" <=> $1 as "similarity",
+            "model"."name" as "model_name",
+            "text_type"."description" as "type_of_text"
         FROM "embedding"
-        WHERE "id_model" = 1
-        ORDER BY similarity ASC
-        LIMIT $2
+        JOIN "document_text" ON "embedding"."id_document_text" = "document_text"."id"
+        JOIN "text_type" ON "document_text"."id_text_type" = "text_type"."id"
+        JOIN "model" ON "embedding"."id_model" = "model"."id"
+        WHERE "model"."name" = $2 AND "text_type"."description" = ANY($3)
+        ORDER BY "similarity" ASC
+        LIMIT $4
     "#;
 
     // run search query
     let search_query = sqlx::query_as(&*search_query_str)
         .bind(search_embedding)
-        // .bind(search_embedding_model.to_string())
-        .bind(search.limit);
+        .bind(search_embedding_model.to_string())
+        .bind(search_allowed_snippets)
+        .bind(search_limit);
 
     return match search_query.fetch_all(&**conn).await {
         Ok(query_result) => {

@@ -9,7 +9,9 @@ use crate::embedder::Embedder;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SearchQuery {
     pub search_query: String,
-    pub limit: i32,
+    pub limit: Option<i32>,
+    pub model: Option<String>,
+    pub allowed_snippets: Option<Vec<String>>,
 }
 
 #[post("/search/context", format="json", data="<search_data>")]
