@@ -14,7 +14,7 @@
 		'what are the coronavirus side effects and tribulations?',
 		'what are the long term effects of corona virus disease Sars-Cov-2?',
 		'how can the coronavirus mutations occour?',
-		'which socioeconomical impacts does the coronavírus have on underdeveloped countries?',
+		'which socioeconomical impacts does the coronavírus have on countries?',
 		'what are the effective medication and safety approaches to coronavírus disease?',
 		'What is the political landscape of the coronavirus pandemic?',
 		'what is the aftermath of the coronavirus pandemic?',
@@ -30,7 +30,7 @@
 		'How long should the wait be for new antiviral drugs?',
 		'When should the hypoxic patient with COVID-19 be intubated?',
 		'How is the digestive system affected by coronavirus disease?',
-		'',
+		''
 	];
 
 	let searchDocs = {
@@ -43,34 +43,26 @@
 		// console.log('Searching');
 		// console.log(e);
 
-		let fetchedDocs = await fetch(`http://localhost:8000/api/search/context`, {
+		let fetchedDocs = await fetch(`https://context-api.jesuisjedi.com/api/search/fast_context`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({
 				search_query: searchDocs.searchQuery,
-				limit: 10
+				limit: 20,
+				allowed_snippets: ['title', 'abstract', 'body_text']
 			})
 		}).then((response) => response.json());
 
 		// console.log(fetchedDocs);
 
-		let docs = fetchedDocs.map(async (snippet) => {
-			let snippet_data = await fetch(
-				`http://localhost:8000/api/document/snippet?id=${snippet.id_document_text}`,
-				{
-					method: 'GET',
-					headers: {
-						'Content-Type': 'application/json'
-					}
-				}
-			).then((response) => response.json());
-
-			return { title: 'not available yet', text: snippet_data.text };
+		searchDocs.docs = fetchedDocs.map((snippet) => {
+			return {
+				title: snippet.paper_id,
+				text: snippet.snippet
+			};
 		});
-
-		searchDocs.docs = fetchedDocs.search_results;
 	}
 
 	function getTruncatedText(text: string, maxLength: number): string {
@@ -105,7 +97,7 @@
 			>
 		</div>
 
-		<div class="py-4 flex flex-col gap-8">
+		<div class="py-4 flex flex-col gap-4">
 			{#each searchDocs.docs as doc}
 				<a href="#" on:click={() => showModalDoc(doc)}>
 					<div class="container py-4 bg-black bg-opacity-25 hover:bg-opacity-40 rounded-2xl">

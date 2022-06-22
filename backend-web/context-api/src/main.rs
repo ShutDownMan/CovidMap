@@ -11,7 +11,7 @@ use anyhow::Result;
 
 use routes::date::get_current_date;
 use routes::snippet::{snippet_post_handler, snippet_get_handler};
-use routes::search::search_handler;
+use routes::search::{search_handler, fast_search_handler};
 use routes::document::get_document_by_paper_id;
 
 use rocket_cors::{AllowedOrigins, CorsOptions};
@@ -63,6 +63,7 @@ async fn main() -> Result<()> {
                 snippet_post_handler,
                 snippet_get_handler,
                 search_handler,
+                fast_search_handler,
                 get_document_by_paper_id
             ],
         )

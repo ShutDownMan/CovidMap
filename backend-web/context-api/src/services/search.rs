@@ -3,7 +3,6 @@ use rocket::serde::{Serialize, Deserialize};
 use rocket::State;
 use std::fmt;
 use sqlx::{Pool, Postgres, FromRow, Type};
-use pgvector::Vector;
 
 use crate::routes::search::SearchQuery;
 use crate::embedder::{Embedder, EmbeddingModelType};
@@ -89,16 +88,20 @@ pub async fn search_context(conn: &State<Pool<Postgres>>, embedder: &State<Embed
 pub struct EmbeddingFastSearchResult {
     pub id_document_text: i32,
     pub embedding_id: i32,
-    pub embedding_vector: Vector,
     pub model_name: String,
     pub type_of_text: String,
-    pub paper_id: i32,
+    pub paper_id: String,
     pub snippet: String,
 }
 
 pub async fn fast_search_context(conn: &State<Pool<Postgres>>, embedder: &State<Embedder>, search: Json<SearchQuery>) -> Result<Vec<EmbeddingFastSearchResult>, SearchError> {
     let search_embedding_model = EmbeddingModelType::DistilBERT;
     let search_embedding = embedder.embed_snippet(&search_embedding_model, &search.search_query);
+    
+    let search_limit = match search.limit {
+        Some(limit) => limit,
+        None => 20
+    };
 
     let search_allowed_snippets = match &search.allowed_snippets {
         Some(allowed_snippets) => allowed_snippets
@@ -108,26 +111,22 @@ pub async fn fast_search_context(conn: &State<Pool<Postgres>>, embedder: &State<
         None => vec![String::from("title"), String::from("abstract")]
     };
     
-    let search_limit = match search.limit {
-        Some(limit) => limit,
-        None => 20
-    };
-
     // create search query
     let search_query_str = r#"
         SELECT
-            DISTINCT "embedding"."id_document_text",
-            "embedding"."id" as "embedding_id",
-            "embedding"."value" <=> $1 as "similarity",
+        *,
+        "embedding_vector" <=> $1 as "similarity"
         FROM "Search_DistilBERT"
-        WHERE "embedding"."id_model" = 1
+        WHERE "type_of_text" = ANY($2)
         ORDER BY "similarity" ASC
-        LIMIT $1
+        LIMIT $3
     "#;
 
     // run search query
     let search_query = sqlx::query_as(&*search_query_str)
-        .bind(search_limit);
+    .bind(search_embedding)
+    .bind(search_allowed_snippets)
+    .bind(search_limit);
 
     return match search_query.fetch_all(&**conn).await {
         Ok(query_result) => {
