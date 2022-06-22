@@ -14,35 +14,15 @@ use routes::snippet::{snippet_post_handler, snippet_get_handler};
 use routes::search::search_handler;
 use routes::document::get_document_by_paper_id;
 
-use rocket::http::Header;
-use rocket::{Request, Response};
-use rocket::fairing::{Fairing, Info, Kind};
+use rocket_cors::{AllowedOrigins, CorsOptions};
 use sqlx::postgres::PgPoolOptions;
+use std::str::FromStr;
 
 mod embedder;
 mod routes;
 mod services;
 
 use embedder::Embedder;
-
-pub struct CORS;
-
-#[rocket::async_trait]
-impl Fairing for CORS {
-    fn info(&self) -> Info {
-        Info {
-            name: "Add CORS headers to responses",
-            kind: Kind::Response
-        }
-    }
-
-    async fn on_response<'r>(&self, _request: &'r Request<'_>, response: &mut Response<'r>) {
-        response.set_header(Header::new("Access-Control-Allow-Origin", "*"));
-        response.set_header(Header::new("Access-Control-Allow-Methods", "POST, GET, PATCH, OPTIONS"));
-        response.set_header(Header::new("Access-Control-Allow-Headers", "*"));
-        response.set_header(Header::new("Access-Control-Allow-Credentials", "true"));
-    }
-}
 
 #[get("/")]
 fn index() -> &'static str {
@@ -61,10 +41,20 @@ async fn main() -> Result<()> {
     
     let embedder = Embedder::new();
 
+    let cors = CorsOptions::default()
+    .allowed_origins(AllowedOrigins::all())
+    .allowed_methods(
+        ["Get", "Post", "Patch"]
+            .iter()
+            .map(|s| FromStr::from_str(s).unwrap())
+            .collect()
+    )
+    .allow_credentials(true)
+    .to_cors()?;
+
     let _rocket = rocket::build()
         .manage(pool)
         .manage(embedder)
-        .attach(CORS)
         .mount(
             "/api",
             routes![
@@ -76,6 +66,7 @@ async fn main() -> Result<()> {
                 get_document_by_paper_id
             ],
         )
+        .attach(cors)
         .ignite().await?
         .launch().await?;
 

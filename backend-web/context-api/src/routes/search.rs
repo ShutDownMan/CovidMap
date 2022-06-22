@@ -27,3 +27,17 @@ pub async fn search_handler(conn: &State<Pool<Postgres>>, embedder: &State<Embed
         }
     }
 }
+
+#[post("/search/context_fast", format="json", data="<search_data>")]
+pub async fn search_handler(conn: &State<Pool<Postgres>>, embedder: &State<Embedder>, search_data: Json<SearchQuery>) -> Value {
+    match services::search::fast_search_context(conn, embedder, search_data).await {
+        Ok(search_result) => {
+            json![search_result]
+        },
+        Err(search_error) => {
+            json!({
+                "message": format!("search failed: {}", search_error.to_string()),
+            })
+        }
+    }
+}

@@ -28,6 +28,16 @@ pub struct Snippet {
     id_document: i32,
 }
 
+#[derive(Type, FromRow, Debug, Serialize, Deserialize)]
+pub struct DocumentSnippet {
+    id: i32,
+    id_text_type: i32,
+    id_document: i32,
+    title: String,
+    snippet_text: String,
+    abstract_text: String,
+}
+
 pub async fn insert_snippet(conn: &State<Pool<Postgres>>, embedder: &State<Embedder>, snippet: Json<InsertSnippet>) -> Result<(), SnippetError> {
     let snippet_embedding_model = EmbeddingModelType::DistilBERT;
     let snippet_embedding = embedder.embed_snippet(&snippet_embedding_model, &snippet.text);
@@ -62,6 +72,35 @@ pub async fn fetch_snippet(conn: &State<Pool<Postgres>>, snippet_data: FetchSnip
     // create search query
     let fetch_snippet_query_str = r#"
         SELECT "id", "text", "id_text_type", "id_document"
+        FROM "document_text"
+        WHERE "id" = $1
+        LIMIT 1
+    "#;
+
+    // run search query
+    let fetch_snippet_query = sqlx::query_as(&*fetch_snippet_query_str)
+        .bind(snippet_data.id);
+
+    return match fetch_snippet_query.fetch_one(&**conn).await {
+        Ok(query_result) => {
+            Ok(query_result)
+        },
+        Err(query_error) => {
+            println!("{}", query_error);
+            Err(SnippetError::InsertError)
+        }
+    }
+}
+
+
+pub async fn fetch_document_snippet(conn: &State<Pool<Postgres>>, snippet_data: FetchSnippet) -> Result<DocumentSnippet, SnippetError> {
+    // create search query
+    let fetch_snippet_query_str = r#"
+        SELECT
+            "document_text"."id",
+            "document_text"."text",
+            "document_text"."id_text_type",
+            "document_text"."id_document",
         FROM "document_text"
         WHERE "id" = $1
         LIMIT 1
