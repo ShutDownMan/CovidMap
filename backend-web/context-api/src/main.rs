@@ -10,7 +10,7 @@ use dotenv;
 use anyhow::Result;
 
 use routes::date::get_current_date;
-use routes::snippet::{snippet_post_handler, snippet_get_handler};
+use routes::snippet::{snippet_post_handler, snippet_get_handler, document_snippet_get_handler};
 use routes::search::{search_handler, fast_search_handler};
 use routes::document::get_document_by_paper_id;
 
@@ -64,7 +64,8 @@ async fn main() -> Result<()> {
                 snippet_get_handler,
                 search_handler,
                 fast_search_handler,
-                get_document_by_paper_id
+                get_document_by_paper_id,
+                document_snippet_get_handler,
             ],
         )
         .attach(cors)

@@ -58,3 +58,19 @@ pub async fn snippet_get_handler(conn: &State<Pool<Postgres>>, id: i32) -> Value
         }
     }
 }
+
+#[get("/document/document_snippet?<id>")]
+pub async fn document_snippet_get_handler(conn: &State<Pool<Postgres>>, id: i32) -> Value {
+    let snippet_result = services::snippet::fetch_document_snippet(conn, FetchSnippet { id: id }).await;
+
+    match snippet_result {
+        Ok(snippet) => {
+            json!(snippet)
+        },
+        Err(snippet_error) => {
+            json!({
+                "message": format!("error when fetching snippet: {}", snippet_error.to_string()),
+            })
+        }
+    }
+}
